@@ -1,0 +1,23 @@
+// 
+// general.scss
+//
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.capitalise {text-transform: capitalize;}
+.allcaps {text-transform: uppercase;}
+
+.pl-0 {padding-left: 0 !important;}
+.pr-0 {padding-right: 0 !important;}
+
+@include media-breakpoint-up(lg) {
+.pl-desktop-0 {padding-left: 0 !important;}
+.pr-desktop-0 {padding-right: 0 !important;}
+}
