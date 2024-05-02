@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, Row, Col, Button } from 'react-bootstrap';
+import user1 from "../../../assets/images/users/user-3.jpg";
 
 interface EmployeesOnleave {
    
         id: number;
         name: string;
-        avatar: string;
+        profile_image: string;
         department: string;
     
 }
@@ -30,7 +31,8 @@ const EmployeesOnLeave: React.FC<EmployeesOnLeaveProps> = ({contacts}) => {
                                         <Card.Body className='p-1'>
                                             <div className="pt-1 pb-1">
                                                 <img
-                                                    src={user.avatar}
+                                                    // src={(user.avatar===null?`${avatar1}`:`${user.avatar}`)}
+                                                    src={(user.profile_image === null || user.profile_image=== '') ? `${user1}` : `${user.profile_image}`}
                                                     className="rounded-circle img-thumbnail avatar-md"
                                                     alt=""
                                                 />

@@ -13,6 +13,7 @@ import config from '../../../../config';
 import { timeoff, leavesStatsRecord } from './data';
 import Loader from '../../../../components/Loader';
 import Today from '../../../dashboard/DashboardEmployee/Today';
+import BASE_URL from '../../../../Base_URL/base_url';
 
 interface TimeoffProps {
     leaveId: number
@@ -302,7 +303,7 @@ const MyTimeoff = () => {
     useEffect(() => {
         const fetchData = async () => {
           try {
-            const url = "/api/get-single-user-leave-list";
+            const url = `${BASE_URL}/api/get-single-user-leave-list`;
             const headers = {
                 'Accept': 'application/json',
                 'Authorization': `Bearer ${config.API_TOKEN}`

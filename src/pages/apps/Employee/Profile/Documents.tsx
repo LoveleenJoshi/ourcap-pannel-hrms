@@ -2,26 +2,131 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, Button, Row, Col } from 'react-bootstrap';
 import classnames from 'classnames';
+import config from "../../../../config";
+import BASE_URL from '../../../../Base_URL/base_url';
 
 // dummy data
-import { docs } from './data';
+// import { docs } from './data';
 import Table from '../../../../components/Table';
 
 
 /* action column render */
-const ActionColumn = ({ row }: { row: any }) => {
+// const ActionColumn = ({ row }: { row: any }) => {
     
+//     return (
+//         <>
+//             <Button variant="light" >
+//                 <i className="mdi mdi-download"></i> 
+//             </Button> {' '}
+//             <Button variant="danger" >
+//                 <i className="mdi mdi-close"></i> 
+//             </Button>
+//         </> 
+//     );
+// };
+
+const ActionColumn = ({ row }: { row: any }) => {
+    const handleDownload = async () => {
+        try {
+            // Log the download attempt
+            console.log('Downloading file from:', row.original.document_file);
+
+            // Fetch the file as a Blob
+            const response = await fetch(row.original.document_file, {
+                method: 'GET', // Assuming GET, update if necessary
+                headers: {
+                    'Authorization': `Bearer ${config.API_TOKEN}`, // If needed
+                    'Content-Type': 'application/pdf'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch the file: ${response.statusText}`);
+            }
+
+         
+            const blob = await response.blob();
+
+         
+            const url = window.URL.createObjectURL(blob);
+
+        
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            const filename = row.original.document_file.split('/').pop() || 'download.pdf';
+            a.download = filename; 
+            document.body.appendChild(a);
+            a.click();
+
+           
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            alert("Your file has been downloaded!"); 
+        } catch (error) {
+            console.error('Download error:', error);
+            alert("Failed to download the file.");
+        }
+    };
+
+    const handleDelete = async (id:Number) => {
+        try {
+           
+            console.log(id)
+            // const ducumentsID=id.toString()
+            const formData = new FormData();
+          
+            formData.append('ducumentsID',id.toString());
+            console.log(formData)
+    
+        
+            const response = await fetch(`${BASE_URL}/api/delete-document`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${config.API_TOKEN}`,
+                },
+                body: formData,
+            });
+    
+            if (response.ok) {
+           
+                console.log('Document deleted successfully');
+            } else {
+                throw new Error('Failed to delete document');
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert('Failed to delete the document.');
+        }
+    };
+    
+    
+
     return (
+        // <button className="btn btn-light" onClick={handleDownload}>
+        //     <i className="mdi mdi-download"></i>
+        // </button>
         <>
-            <Button variant="light" >
-                <i className="mdi mdi-download"></i> 
-            </Button> {' '}
-            <Button variant="danger" >
-                <i className="mdi mdi-close"></i> 
-            </Button>
-        </> 
+                     <Button variant="light" onClick={handleDownload}>
+                        <i className="mdi mdi-download"></i> 
+                     </Button> {' '}
+                    <Button variant="danger" onClick={() => handleDelete(row.original.id)}>
+                        <i className="mdi mdi-close"></i> 
+                    </Button>
+                 </> 
+        
     );
 };
+interface Docs {
+    id:number;
+    sn: number;
+    title:string;
+    document_file: string
+}
+interface DocsProp{
+    DocsData:Docs[]
+}
 
 const columns = [
     {
@@ -31,12 +136,12 @@ const columns = [
     },
     {
         Header: 'File Name',
-        accessor: 'file',
+        accessor: 'title',
         sort: false,
     },
     {
         Header: 'Action',
-        accessor: 'action',
+        accessor: 'document_file',
         sort: false,
         Cell: ActionColumn
     },
@@ -57,21 +162,43 @@ const sizePerPageList = [
     },
     {
         text: 'All',
-        value: docs.length,
+        value:0,
     },
 ];
 
 // feeds
-const Job = () => {
+const Documents : React.FC <DocsProp>=({DocsData}) => {
+    // const [selectedFiles,setSelectedFiles]=useState<FileList|null>(null);
 
+    // const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    //     if (event.target.files) {
+    //         setSelectedFiles(event.target.files);
+    //     }
+    // };
+
+    // const handleUpload = () => {
+    //     if (selectedFiles) {
+    //         // Handle file upload logic here, e.g., send files to the server
+    //         console.log('Uploading files:', selectedFiles);
+    //     }
+    // };
+let modifiedDocsData=DocsData.map((doc,index)=>({
+    ...doc,
+    sn:index+1
+}))
     return (
         <>
            
             
             <Card>
                 <Card.Body>
-                    <Button variant='outline-primary' className="btn-sm waves-effect waves-light float-end">
+                {/* <input type="file"  multiple />{' '}
+                    {/* Allow multiple file selection */}
+                    {/* <Button variant="outline-primary" className="btn-sm waves-effect waves-light float-end" onClick={handleUpload}>
                         <i className="mdi mdi-upload"></i> Upload
+                    </Button> */} 
+                    <Button variant='outline-primary' className="btn-sm waves-effect waves-light float-end">
+                        <i className="mdi mdi-upload" ></i> Upload
                     </Button>
                     <h4 className="header-title mb-3">Documents</h4>
                     <Row>
@@ -79,7 +206,7 @@ const Job = () => {
                                 <>
                                    <Table
                                         columns={columns}
-                                        data={docs}
+                                        data={modifiedDocsData}
                                         pageSize={10}
                                         sizePerPageList={sizePerPageList}
                                         isSortable={false}
@@ -97,4 +224,4 @@ const Job = () => {
     );
 };
 
-export default Job;
+export default Documents;

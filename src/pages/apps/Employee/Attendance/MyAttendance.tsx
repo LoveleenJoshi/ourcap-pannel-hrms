@@ -16,6 +16,7 @@ import Loader from '../../../../components/Loader';
 import Today from '../../../dashboard/DashboardEmployee/Today';
 //api data
 import { userAttendanceApi } from "../../../../helpers/api/apiServices";
+import BASE_URL from '../../../../Base_URL/base_url';
 const api = new APICore();
 {/* standard modal */}
 const NoteModal = ({modal, toggleModal, date, note}:{modal:any, toggleModal:any, date:any, note:any}) => {
@@ -170,7 +171,7 @@ const MyAttendance = () => {
         const fetchData = async () => {
           try {
             setLoading(true);
-            const url = "/api/get-user-attendance";
+            const url = `${BASE_URL}/api/get-user-attendance`;
             const headers = {
                 'Accept': 'application/json',
                 'Authorization': `Bearer ${config.API_TOKEN}`
@@ -187,6 +188,7 @@ const MyAttendance = () => {
             const response = await fetch(url, requestOptions); 
             if(response.status === 200){
                 const result = await response.json();
+                console.log(result.data[0].notes)
                 setAttendanceData(result.data);
                 setAttendanceStatsData(result.data);
             }

@@ -14,11 +14,13 @@ interface UserProfileData {
     timezone: string;
     department: string;
     office: string;
+    profile_image:string
 }
 
 const UserProfile : React.FC = () => {
     const [userData, setUserData] = useState<UserProfileData>({
-        name:"",
+        profile_image:"",
+    name:"",
     designation:'',
     email: '',
     phone:'',
@@ -45,11 +47,11 @@ const UserProfile : React.FC = () => {
                     const result = await response.json();
                     setUserData({
                         name:result.data.user.name,
-                        
+                        profile_image:result.data.user.profile_image,
                         designation:result.data.employee_detail.job_title,
                         email: result.data.user.email,
                         phone:result.data.user.contact_number,
-                        timezone: '',
+                        timezone: result.data.user.timezone,
                         department: result.data.employee_detail.department,
                         office: result.data.employee_detail.office
 
@@ -72,7 +74,10 @@ const UserProfile : React.FC = () => {
                    
 
                     <div className="d-flex align-self-start">
-                        <img className="d-flex align-self-start rounded-circle me-2" src={avatar} alt="" height="48" />
+                        <img className="d-flex align-self-start rounded-circle me-2"
+                         src={userData.profile_image===null||userData.profile_image===""?`${avatar}`:userData.profile_image}
+                          alt="" 
+                          height="48" />
 
                         <div className="w-100 ps-1">
                             <h4 className="mt-1 mb-0">{userData.name}</h4>

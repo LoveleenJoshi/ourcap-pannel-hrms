@@ -11,7 +11,9 @@ import Payroll from './Payroll';
 import Documents from './Documents';
 import Settings from './Settings';
 import { bank } from './data';
-import BASE_URL from "../../../../Base_URL/base_url"
+import BASE_URL from "../../../../Base_URL/base_url";
+
+
 // more
 
 
@@ -72,6 +74,28 @@ interface Probation{
     Comment: string
     Attached_File: string
 }
+interface JobTimeline {
+    from_date: string;
+    to_date: string
+    job_title: string;
+    position_type: string;
+    employement_type: string;
+    department: string;
+    contract: any;
+}
+
+interface Salary {
+    effective_from: string;
+    effective_to: string
+    total_salary: string;
+    link: string;
+}
+interface Docs {
+    sn: number;
+    title:string;
+    document_file: string;
+    id:number
+}
 
 const More = () => {
 const [userData,setUserData]= useState<Personal>({
@@ -124,6 +148,26 @@ const [probation,setProbation]=useState<Probation>({
     Comment: "",
     Attached_File:""
 })
+
+const [jobTimeLine,setJobTime]=useState<JobTimeline>({
+    from_date: "",
+    to_date: "",
+    job_title: "",
+    position_type:"",
+    employement_type:"",
+    department: "",
+    contract: null
+})
+
+// const [salaryData, setSalarydata] = useState<Salary>({
+//     salary_period: "",
+//     generated_on: "",
+//     total_salary: "",
+//     link: ""
+// })
+const [salaryData, setSalarydata] = useState<Salary[]>([]);
+const [docsData, setDocsdata] = useState<Docs[]>([]);
+
 useEffect(() => {
     const fetchData = async () => {
         try {
@@ -140,7 +184,7 @@ useEffect(() => {
             const response = await fetch(url, requestOptions);
             if (response.ok) {
                 const result = await response.json();
-                console.log( result.data.user.name)
+                // console.log( result.data.user.name)
                 setUserData({
                     Full_Name: result.data.user.name,
                     Gender: result.data.user.gender,
@@ -180,7 +224,7 @@ useEffect(() => {
                 });
                 const { start_date, end_date, result:newResult, comment, attachments } = result.data.probationDetails[0];
 
-            // Assuming setProbation is a function that handles the fetched data
+      
             setProbation({
                 Probation_Start_Date: start_date,
                 Probation_End_Date: end_date,
@@ -188,14 +232,19 @@ useEffect(() => {
                 Comment: comment,
                 Attached_File: attachments
             });
-                // setProbation({
-                //     Probation_Start_Date:result.data.probationDetails[0].start_date,
-                //     Probation_End_Date:result.data.probationDetails[0].end_date,
-                //     Result: result.data.probationDetails[0].result,
-                //     Comment: result.data.probationDetails[0].comment,
-                //     Attached_File:result.data.probationDetails[0].attachments
-                // })
-                console.log(  `Gender: ${result.data.user.gender}`)
+            setJobTime({
+                from_date: result.data.employee_detail.date_of_join ,
+                to_date:  result.data.employee_detail.effective_date,
+                job_title:  result.data.employee_detail.job_title,
+                position_type: result.data.employee_detail.position,
+                employement_type: result.data.employee_detail.employee_type,
+                department: result.data.employee_detail.department,
+                contract: null
+            })
+        
+            setSalarydata(result.data.getMonthWiseSalary)
+            setDocsdata(result.data.uploadedDocument)
+                // console.log(  `Gender: ${result.data.user.gender}`)
             } else {
                 console.error("Failed to fetch PersonalData: ", response.statusText);
             }
@@ -249,16 +298,25 @@ useEffect(() => {
     
                         <Tab.Content className="pt-0">
                             <Tab.Pane eventKey="general" className="p-0">
-                                <General  personalData={userData} addressData={Address} emergancyData={emergancy} bankData={bankdata}/>
+                                <General  
+                                personalData={userData} 
+                                setPersonalData={setUserData}  
+                                addressData={Address} 
+                                setAddressData={setAddress}
+                                emergancyData={emergancy} 
+                                setEmergencyData={setEmergancy}
+                                bankData={bankdata}
+                                setBankDetailsData={setBankData}/>
                             </Tab.Pane>
                             <Tab.Pane eventKey="job" className="p-0">
-                                <Job  jobDataProp={jobRelatedData} probationDataProp={probation}/>
+                                <Job  jobDataProp={jobRelatedData} probationDataProp={probation}  JobTimeLineDataProp={[jobTimeLine]}/>
                             </Tab.Pane>
                             <Tab.Pane eventKey="payroll" className="p-0">
-                                <Payroll/> 
+                            <Payroll SalaryData={salaryData}/>  
+                                {/* <Payroll />  */}
                             </Tab.Pane>
                             <Tab.Pane eventKey="documents" className="p-0">
-                                <Documents/>
+                                <Documents DocsData={docsData}/>
                             </Tab.Pane>
                             <Tab.Pane eventKey="settings" className="p-0">
                                 <Settings/>

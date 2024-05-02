@@ -4,7 +4,7 @@ import { Card, Button, Row, Col } from 'react-bootstrap';
 import classnames from 'classnames';
 
 // dummy data
-import { employment, probation, job } from './data';
+// import { employment, probation, job } from './data';
 import Table from '../../../../components/Table';
 /* const CommonLoop = ({ info }: { info: any }) => {
     return (
@@ -21,6 +21,7 @@ import Table from '../../../../components/Table';
 } */
 
 /* action column render */
+
 const ActionColumn = ({ row }: { row: any }) => {
     
     return (
@@ -86,7 +87,7 @@ const sizePerPageList = [
     },
     {
         text: 'All',
-        value: job.length,
+        value: 0,
     },
 ];
 
@@ -113,7 +114,19 @@ interface Probation{
 interface ProbationProp{
     probationDataProp:Probation
 }
-const Job: React.FC<EmployementProps & ProbationProp>= ({jobDataProp, probationDataProp}) => {
+interface JobTimeline {
+    from_date: string;
+    to_date: string
+    job_title: string;
+    position_type: string;
+    employement_type: string;
+    department: string;
+    contract: any;
+}
+interface JobTimelineProp {
+    JobTimeLineDataProp: JobTimeline[]; 
+}
+const Job: React.FC<EmployementProps & ProbationProp & JobTimelineProp>= ({jobDataProp, probationDataProp,JobTimeLineDataProp}) => {
 
     return (
         <>
@@ -155,7 +168,7 @@ const Job: React.FC<EmployementProps & ProbationProp>= ({jobDataProp, probationD
                     <Row>
                         <Table
                             columns={columns}
-                            data={job}
+                            data={JobTimeLineDataProp}
                             pageSize={10}
                             sizePerPageList={sizePerPageList}
                             isSortable={false}

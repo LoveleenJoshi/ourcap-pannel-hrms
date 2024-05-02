@@ -8,6 +8,7 @@ import Clockinout from './Clockinout';
 import Holidays from './Holidays';
 import Today from './Today';
 import { error } from 'console';
+import BASE_URL from '../../../Base_URL/base_url';
 // import { emplyeesonleaveList, holidayList } from './data';
 
 interface Holiday {
@@ -24,9 +25,18 @@ interface Holiday {
     updated_at: string
  
 };
+interface EmployeesOnleave {
+   
+  id: number;
+  name: string;
+  profile_image: string;
+  department: string;
+
+}
 
 const Dashboard = () => {
   const [holidaylist, setHolidayList] = useState<Holiday[]>([]);
+  const [leaveList,setLeaveList]=useState<EmployeesOnleave[]>([]);
   // const [employeeLeaveList,setEmploeeLeaveList]=useState<EmployeesOnLeave[]>([]);
   // const [loading,setLoading]=useState(true)
 
@@ -34,7 +44,7 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
 
-        const url = "/api/get-holiday";
+        const url = `${BASE_URL}/api/get-holiday`;
         const headers = {
             'Accept': 'application/json',
             'Authorization': `Bearer ${config.API_TOKEN}`
@@ -49,6 +59,37 @@ const Dashboard = () => {
             const result = await response.json();
             setHolidayList(result.data.holiday);
             console.log()
+        }else{
+          console.error("Failed to fetch Holidays : " )
+        }
+
+      } catch (error:any) {
+        console.error(error);
+      } 
+    };
+
+    fetchData(); 
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+
+        const url = `${BASE_URL}/api/dashboard`;
+        const headers = {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${config.API_TOKEN}`
+          };
+         
+          const requestOptions = {
+            method: 'GET',
+            headers: headers,
+          };
+        const response = await fetch(url, requestOptions); 
+        if(response.status===200){
+            const result = await response.json();
+          setLeaveList(result.data.leave);
+            // console.log(result.data.leave)
         }else{
           console.error("Failed to fetch Holidays : " )
         }
@@ -84,7 +125,7 @@ const Dashboard = () => {
 
             <Row className='flex-column-reverse flex-md-row'>
                 <Col lg={8} xl={8} >
-                    <EmployeesOnLeave contacts={[]}/>
+                    <EmployeesOnLeave contacts={leaveList}/>
                 </Col>
                 <Col lg={4} xl={4}  >
                     <Clockinout/>
