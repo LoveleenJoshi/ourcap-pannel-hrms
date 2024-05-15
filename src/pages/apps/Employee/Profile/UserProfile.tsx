@@ -89,10 +89,10 @@ const UserProfile : React.FC = () => {
                     <h5>{userData.email}</h5>
 
                     <h6 className="font-13 text-muted mt-3 text-uppercase">PHONE</h6>
-                    <h5>+91 9928000011</h5>
+                    <h5>{userData.phone}</h5>
 
                     <h6 className="font-13 text-muted mt-3 text-uppercase">TIMEZONE</h6>
-                    <h5>GMT +05:30</h5>
+                    <h5>{userData.timezone}</h5>
 
                  
 

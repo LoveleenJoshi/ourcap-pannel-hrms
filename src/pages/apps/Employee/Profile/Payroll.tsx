@@ -53,7 +53,8 @@ const ActionColumn = ({ row }: { row: any }) => {
                 method: 'GET', // Assuming GET, update if necessary
                 headers: {
                     'Authorization': `Bearer ${config.API_TOKEN}`, // If needed
-                    'Content-Type': 'application/pdf'
+                    'Content-Type': 'application/pdf',
+                    'Accept': 'application/json'
                 }
             });
 
@@ -179,40 +180,7 @@ const sizePerPageList = [
 ];
 
 // feeds
-// const Job : React.FC< SalaryProp> =({SalaryData})=> {
-//     // const Job =()=> {
-//     return (
-//         <>
-           
-            
-//             <Card>
-//                 <Card.Body>
-                  
-//                     <h4 className="header-title mb-3">Salary Record</h4>
-//                     <Row>
-                           
-//                                 <>
-//                                    <Table
-//                                         columns={columns}
-//                                         data={[SalaryData]}
-//                                         pageSize={10}
-//                                         sizePerPageList={sizePerPageList}
-//                                         isSortable={false}
-//                                         pagination={false}
-//                                         isSearchable={false}
-//                                         tableClass="table-striped dt-responsive nowrap w-100"
-//                                     />
-//                                 </>
-                          
-//                     </Row>
-//                 </Card.Body>
-//             </Card>
-           
-//         </>
-//     );
-// };
 
-// export default Job;
 const Payroll : React.FC< SalaryProp> =({SalaryData})=>{
     // console.log(SalaryData)
     return (

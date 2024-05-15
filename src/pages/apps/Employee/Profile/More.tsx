@@ -10,7 +10,7 @@ import Job from './Job';
 import Payroll from './Payroll';
 import Documents from './Documents';
 import Settings from './Settings';
-import { bank } from './data';
+// import { bank } from './data';
 import BASE_URL from "../../../../Base_URL/base_url";
 
 
@@ -96,7 +96,12 @@ interface Docs {
     document_file: string;
     id:number
 }
-
+interface Timezone {
+    id?: number;
+    name: string;
+    timezoneformat: string;
+    offset?: string;
+}
 const More = () => {
 const [userData,setUserData]= useState<Personal>({
     Full_Name: '',
@@ -167,6 +172,7 @@ const [jobTimeLine,setJobTime]=useState<JobTimeline>({
 // })
 const [salaryData, setSalarydata] = useState<Salary[]>([]);
 const [docsData, setDocsdata] = useState<Docs[]>([]);
+const [timezone,setTimeZone]=useState<Timezone[]>([]);
 
 useEffect(() => {
     const fetchData = async () => {
@@ -196,6 +202,22 @@ useEffect(() => {
                     Email_Address: result.data.user.email,
                     Phone_Number: result.data.user.contact_number,
                 });
+                // setTimeZone({ 
+                //     name: result.data.user.timezone, 
+                //     timezoneformat: result.data.user.timezone,
+                //     id: undefined,  // Explicitly set undefined if necessary
+                //     offset: undefined  // Explicitly set undefined if necessary
+                // });
+                const timezoneName = result.data.user.timezone; // Assume this is a string
+            // Create a new timezone object with this name
+            const newTimezone = {
+                name: timezoneName,
+                timezoneformat: timezoneName,  // Example adjustment
+                id: undefined,  // Since no id is available
+                offset: undefined  // Since no offset is provided
+            };
+            console.log(newTimezone.name)
+            setTimeZone([newTimezone]); 
                 setAddress({
                     Primary_Address: result.data.addresses.primary_address,
                     Country: result.data.addresses.country_name,
@@ -243,7 +265,8 @@ useEffect(() => {
             })
         
             setSalarydata(result.data.getMonthWiseSalary)
-            setDocsdata(result.data.uploadedDocument)
+            setDocsdata(result.data.uploadedDocument); 
+            console.log(result.data.uploadedDocument)
                 // console.log(  `Gender: ${result.data.user.gender}`)
             } else {
                 console.error("Failed to fetch PersonalData: ", response.statusText);
@@ -316,10 +339,13 @@ useEffect(() => {
                                 {/* <Payroll />  */}
                             </Tab.Pane>
                             <Tab.Pane eventKey="documents" className="p-0">
-                                <Documents DocsData={docsData}/>
+                                <Documents DocsData={docsData} setDocsDataMain={setDocsdata}/>
                             </Tab.Pane>
                             <Tab.Pane eventKey="settings" className="p-0">
-                                <Settings/>
+                                {/* <Settings SettingsData={timezone}/> */}
+                                                            {timezone.length > 0 && (
+                                    <Settings SettingsData={timezone[0]} />
+                                )} 
                             </Tab.Pane>
                            
                         </Tab.Content>

@@ -2,7 +2,8 @@
   "name": "ourcap",
   "homepage": "/ourcap/",
   "version": "1.0.0",
-  "proxy": "http://35.154.28.156/",
+  "proxy": "https://ourcap-hrms.ctportfolio.in",
+  
   "private": true,
   "dependencies": {
     "@fullcalendar/bootstrap": "^5.8.0",

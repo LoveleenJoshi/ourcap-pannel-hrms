@@ -9,6 +9,9 @@ import Holidays from './Holidays';
 import Today from './Today';
 import { error } from 'console';
 import BASE_URL from '../../../Base_URL/base_url';
+
+import Anouncements from './Announcements';
+import Announcements from './Announcements';
 // import { emplyeesonleaveList, holidayList } from './data';
 
 interface Holiday {
@@ -34,9 +37,19 @@ interface EmployeesOnleave {
 
 }
 
+interface Announcement {
+  id: number;
+  title: string;
+  description: string;
+  images: string;
+  created_at: string;
+  name: string;
+}
+
 const Dashboard = () => {
   const [holidaylist, setHolidayList] = useState<Holiday[]>([]);
   const [leaveList,setLeaveList]=useState<EmployeesOnleave[]>([]);
+  const [announcements,setAnnouncements]=useState<Announcement[]>([]);
   // const [employeeLeaveList,setEmploeeLeaveList]=useState<EmployeesOnLeave[]>([]);
   // const [loading,setLoading]=useState(true)
 
@@ -89,7 +102,8 @@ const Dashboard = () => {
         if(response.status===200){
             const result = await response.json();
           setLeaveList(result.data.leave);
-            // console.log(result.data.leave)
+          // setAnnouncements(result.data.news)
+            console.log(result.data)
         }else{
           console.error("Failed to fetch Holidays : " )
         }
@@ -101,6 +115,40 @@ const Dashboard = () => {
 
     fetchData(); 
   }, []);
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+
+        const url = `${BASE_URL}/api/user`;
+        const headers = {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${config.API_TOKEN}`
+          };
+         
+          const requestOptions = {
+            method: 'GET',
+            headers: headers,
+          };
+        const response = await fetch(url, requestOptions); 
+        if(response.status===200){
+            const result = await response.json();
+       
+          setAnnouncements(result.data.news)
+            console.log(result.data)
+        }else{
+          console.error("Failed to fetch Holidays : " )
+        }
+
+      } catch (error:any) {
+        console.error(error);
+      } 
+    };
+
+    fetchData(); 
+  }, []);
+
 
     return (
         <>
@@ -126,6 +174,8 @@ const Dashboard = () => {
             <Row className='flex-column-reverse flex-md-row'>
                 <Col lg={8} xl={8} >
                     <EmployeesOnLeave contacts={leaveList}/>
+               <Announcements announcement={announcements}/>
+                    
                 </Col>
                 <Col lg={4} xl={4}  >
                     <Clockinout/>

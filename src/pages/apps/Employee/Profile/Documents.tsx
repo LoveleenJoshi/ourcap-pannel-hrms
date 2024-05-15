@@ -70,6 +70,9 @@ const ActionColumn = ({ row }: { row: any }) => {
         }
     };
 
+    
+    
+   
     const handleDelete = async (id:Number) => {
         try {
            
@@ -81,17 +84,18 @@ const ActionColumn = ({ row }: { row: any }) => {
             console.log(formData)
     
         
-            const response = await fetch(`${BASE_URL}/api/delete-document`, {
+            const response = await fetch(`${BASE_URL}/api/delete-ducument`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${config.API_TOKEN}`,
+                    'Accept': 'application/json'
                 },
                 body: formData,
             });
     
             if (response.ok) {
            
-                console.log('Document deleted successfully');
+                alert('Document deleted successfully');
             } else {
                 throw new Error('Failed to delete document');
             }
@@ -101,8 +105,6 @@ const ActionColumn = ({ row }: { row: any }) => {
         }
     };
     
-    
-
     return (
         // <button className="btn btn-light" onClick={handleDownload}>
         //     <i className="mdi mdi-download"></i>
@@ -111,22 +113,23 @@ const ActionColumn = ({ row }: { row: any }) => {
                      <Button variant="light" onClick={handleDownload}>
                         <i className="mdi mdi-download"></i> 
                      </Button> {' '}
-                    <Button variant="danger" onClick={() => handleDelete(row.original.id)}>
+                    <Button variant="danger" onClick={() =>handleDelete(row.original.id)}>
                         <i className="mdi mdi-close"></i> 
                     </Button>
                  </> 
         
-    );
-};
-interface Docs {
-    id:number;
-    sn: number;
-    title:string;
-    document_file: string
-}
-interface DocsProp{
-    DocsData:Docs[]
-}
+                        );
+                    };
+                    interface Docs {
+                        id:number;
+                        sn: number;
+                        title:string;
+                        document_file: string
+                    }
+                    interface DocsProp{
+                        DocsData:Docs[];
+                        setDocsDataMain: React.Dispatch<React.SetStateAction<Docs[]>>;
+                    }
 
 const columns = [
     {
@@ -167,21 +170,67 @@ const sizePerPageList = [
 ];
 
 // feeds
-const Documents : React.FC <DocsProp>=({DocsData}) => {
-    // const [selectedFiles,setSelectedFiles]=useState<FileList|null>(null);
+const Documents : React.FC <DocsProp>=({DocsData,setDocsDataMain}) => {
+    const [selectedFiles,setSelectedFiles]=useState<FileList|null>(null);
+    const [documents, setDocuments] = useState<Docs[]>(DocsData);
 
-    // const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    //     if (event.target.files) {
-    //         setSelectedFiles(event.target.files);
-    //     }
-    // };
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            setSelectedFiles(event.target.files);
+        }
+    };
+    
+    const handleUpload = async () => {
+        if (selectedFiles && selectedFiles.length > 0) {
+            const formData = new FormData();
+            Array.from(selectedFiles).forEach(file => {
+                formData.append('document_file', file);
+            });
 
-    // const handleUpload = () => {
-    //     if (selectedFiles) {
-    //         // Handle file upload logic here, e.g., send files to the server
-    //         console.log('Uploading files:', selectedFiles);
-    //     }
-    // };
+            formData.append('title', 'Your Default Title Here');
+
+            const headers = {
+                "Accept": "application/json",
+                "Authorization": `Bearer ${config.API_TOKEN}`
+            };
+
+            try {
+                const response = await fetch('http://35.154.28.156/api/upload-document', {
+                    method: 'POST',
+                    headers: headers,
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Upload successful:', result);
+                    alert('Upload successful!');
+                    // Update the documents state
+                    // setDocuments([...documents, {
+                    //     id: result.id,  // Assuming the API returns the new document's ID
+                    //     sn: documents.length + 1,
+                    //     title: result.title || 'New Document',  // Use title from result or a placeholder
+                    //     document_file: result.document_file
+                    // }]);
+                    setDocsDataMain(prevDocs => [...prevDocs, {
+                        id: result.id, // Ensure your backend returns the ID
+                        sn: prevDocs.length + 1,
+                        title: result.title || 'New Document',
+                        document_file: result.document_file
+                    }]);
+                } else {
+                    const errorResult = await response.json();
+                    throw new Error(`Upload failed: ${errorResult.message || JSON.stringify(errorResult)}`);
+                }
+            } catch (error) {
+                console.error('Error uploading file:', error);
+            }
+        } else {
+            alert('No file selected.');
+        }
+    };
+
+    
 let modifiedDocsData=DocsData.map((doc,index)=>({
     ...doc,
     sn:index+1
@@ -192,13 +241,12 @@ let modifiedDocsData=DocsData.map((doc,index)=>({
             
             <Card>
                 <Card.Body>
-                {/* <input type="file"  multiple />{' '}
-                    {/* Allow multiple file selection */}
-                    {/* <Button variant="outline-primary" className="btn-sm waves-effect waves-light float-end" onClick={handleUpload}>
-                        <i className="mdi mdi-upload"></i> Upload
-                    </Button> */} 
-                    <Button variant='outline-primary' className="btn-sm waves-effect waves-light float-end">
-                        <i className="mdi mdi-upload" ></i> Upload
+                
+                         <input type="file" multiple onChange={handleFileChange} />
+                    <Button variant='outline-primary'  onClick={handleUpload}
+                    className="btn-sm waves-effect waves-light float-end">
+                        <i className="mdi mdi-upload"
+                        ></i> Upload
                     </Button>
                     <h4 className="header-title mb-3">Documents</h4>
                     <Row>

@@ -5,6 +5,7 @@ import classnames from 'classnames';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import config from '../../../../config';
+import BASE_URL from '../../../../Base_URL/base_url';
 // dummy data
 // import { bank } from './data';
 interface Personal {
@@ -135,7 +136,7 @@ const General: React.FC<GeneralProps & AddressProp & EmergencyProp & BankProp> =
             // If you have a file input in your form, you can append it like this:
             // formData.append('profile_images', file);
     
-            const response = await fetch('http://35.154.28.156/api/profile/update', {
+            const response = await fetch(`${BASE_URL}/api/profile/update`, {
                 method: 'POST',
                 headers: headers,
                 body: formData
@@ -212,7 +213,7 @@ const General: React.FC<GeneralProps & AddressProp & EmergencyProp & BankProp> =
             // If you have a file input in your form, you can append it like this:
             // formData.append('profile_images', file);
     
-            const response = await fetch('http://35.154.28.156/api/add-update-address', {
+            const response = await fetch(`${BASE_URL}/api/add-update-address`, {
                 method: 'POST',
                 headers: headers,
                 body: formData
@@ -272,7 +273,7 @@ const General: React.FC<GeneralProps & AddressProp & EmergencyProp & BankProp> =
         formData.append("relation",updateEmergency.Relationship);
         formData.append("emergency_contact_number",updateEmergency.Phone_Number)
         console.log(formData);
-        const response=await fetch("http://35.154.28.156/api/emergency-detail",{
+        const response=await fetch(`${BASE_URL}/api/emergency-detail`,{
             method:"POST",
             headers:headers,
             body:formData
@@ -302,11 +303,11 @@ const General: React.FC<GeneralProps & AddressProp & EmergencyProp & BankProp> =
     }
    }
     const handleEmergencyChange=async(e:React.ChangeEvent<HTMLInputElement>)=>{
-  const{name,value}=e.target;
-  setUpdateEmergency((prevData=>({
+    const{name,value}=e.target;
+    setUpdateEmergency((prevData=>({
     ...prevData,
     [name]:value!==undefined?value:''
-  })))
+    })))
     }
 
 
@@ -321,6 +322,60 @@ const General: React.FC<GeneralProps & AddressProp & EmergencyProp & BankProp> =
         setUpdateBankDetails({...bankData})
         setIsBankEditing(false)
     }
+
+    const onBankDetailsSubmit=async()=>{
+        try{
+         
+            console.log("Sending requests");
+         const headers={
+           "Accept":"application/json",
+           "Authorization":`Bearer ${config.API_TOKEN}`
+         }
+        const formData = new FormData();
+        formData.append("name",updateBankDetails.Bank_Name);
+        formData.append("branch",updateBankDetails.Branch);
+        formData.append("shift_bic",updateBankDetails.SWIFT);
+        formData.append("account_holder_name",updateBankDetails.Account_Name);
+        // formData.append("account_number",updateBankDetails.Account_Name);
+        formData.append("pan_number",updateBankDetails.PAN);
+        formData.append("ifsc_code",updateBankDetails.IFSC);
+        console.log(formData);
+        const response=await fetch(`${BASE_URL}/api/add-update-bank-details`,{
+            method:"POST",
+            headers:headers,
+            body:formData
+        });
+        console.log("response :" ,response);
+        if(!response.ok){
+            throw new Error(`HTTP error! Status: ${response.status}`)
+        }
+       const responseData=await response.json();
+       alert(responseData.message)
+        
+        
+       setBankDetailsData(updateBankDetails);
+       setUpdateBankDetails(prevData=>({
+           ...prevData,
+           ...responseData.data
+        })
+           
+        )
+        }
+        catch(err){
+            console.error('Error updating personal info:', err);
+        }
+        finally{
+        setIsBankEditing(false)
+        }
+    }
+
+    const handleBankChange=async(e:React.ChangeEvent<HTMLInputElement>)=>{
+        const{name,value}=e.target;
+        setUpdateBankDetails((prevData=>({
+        ...prevData,
+        [name]:value!==undefined?value:''
+        })))
+    }
     return (
         <>
             <Card key="personal-info">
@@ -330,7 +385,7 @@ const General: React.FC<GeneralProps & AddressProp & EmergencyProp & BankProp> =
                     </Button>)}
                     {isPersonalEditing && (
                          <div className="d-flex justify-content-end">
-                         <Button variant="secondary" className="me-2" onClick={handlePersonalCancelClick}>
+                         <Button  className="me-2 btn btn-light" onClick={handlePersonalCancelClick}>
                              Cancel
                          </Button>
                          <Button variant="primary" onClick={handleSubmit(onPersonalSubmit)}>
@@ -348,7 +403,7 @@ const General: React.FC<GeneralProps & AddressProp & EmergencyProp & BankProp> =
                         <Form.Control 
                             type="text" 
                             name={key} 
-                            value={updatedData[key as keyof Personal]} // Bind to updatedData instead of value directly
+                            value={updatedData[key as keyof Personal] || ""} // Bind to updatedData instead of value directly
                             onChange={handlePersonalChange} 
                         />
                     ) : (
@@ -370,7 +425,7 @@ const General: React.FC<GeneralProps & AddressProp & EmergencyProp & BankProp> =
                     )}
                     {isAddressEditing && (
                         <div className="d-flex justify-content-end">
-                            <Button variant="secondary" className="me-2" onClick={handleAddressCancelClick}>
+                            <Button  className="me-2 btn btn-light" onClick={handleAddressCancelClick}>
                                 Cancel
                             </Button>
                             <Button variant="primary" onClick={handleSubmit(onAddressSubmit)}>
@@ -388,7 +443,7 @@ const General: React.FC<GeneralProps & AddressProp & EmergencyProp & BankProp> =
                                         <Form.Control
                                             type="text"
                                             name={key}
-                                            value={updatedAddress[key as keyof Address]} // Bind to updatedData instead of value directly
+                                            value={updatedAddress[key as keyof Address] || ""} // Bind to updatedData instead of value directly
                                             onChange={handleAddressChange}
                                         />
                                     ) : (
@@ -409,7 +464,7 @@ const General: React.FC<GeneralProps & AddressProp & EmergencyProp & BankProp> =
 
                 {isEmergencyEditing  && (
                    <div  className='d-flex justify-content-end'>
-                     <Button variant="secondary" className="me-2"
+                     <Button  className="me-2 btn btn-light"
                       onClick={handleEmergencyCancelClick}>Cancel</Button>
                         <Button variant="primary" className="me-2"
                      onClick={handleSubmit(onEmergencySubmit)}>save</Button>
@@ -426,13 +481,12 @@ const General: React.FC<GeneralProps & AddressProp & EmergencyProp & BankProp> =
                                             <Form.Control
                                             type="text"
                                             name={key}
-                                            value={updateEmergency[key as keyof Emergency]} // Bind to updatedData instead of value directly
+                                            value={updateEmergency[key as keyof Emergency] || ""} // Bind to updatedData instead of value directly
                                             onChange={handleEmergencyChange}
                                         />
                                         ):(value)
                                         
-                                        
-                                        }</Col>
+                                    }</Col>
                                     </Row>
                                 ))}
                             
@@ -452,9 +506,9 @@ const General: React.FC<GeneralProps & AddressProp & EmergencyProp & BankProp> =
                     }
                     {
                         (isBankEditing) && (
-                          <div className='d-flex justify-content-center'>
-                              <Button variant="secondary" className="me-2" onClick={handleCancelBankDetails}>cancel</Button>
-                            <Button variant="primary">save</Button>
+                          <div className='d-flex justify-content-end'>
+                              <Button  className="me-2 btn btn-light" onClick={handleCancelBankDetails}>cancel</Button>
+                            <Button variant="primary" className="me-2"  onClick={handleSubmit(onBankDetailsSubmit)}>save</Button>
                           </div>
                         )
                     }
@@ -465,9 +519,15 @@ const General: React.FC<GeneralProps & AddressProp & EmergencyProp & BankProp> =
                                     <Row className='font-14' key={`bank-${key}`}>
                                         <Col xs={6} className='text-secondary pr-0'>{key.split('_').join(' ')}</Col>
                                         <Col xs={6} className='mb-1'>{
-                                    
-                                        
-                                        value
+                                    (isBankEditing)?
+                                        (
+                                            <Form.Control
+                                            type="text"
+                                            name={key}
+                                            value={updateBankDetails[key as keyof Bank] || ""} // Bind to updatedData instead of value directly
+                                            onChange={handleBankChange}
+                                        />
+                                        ):(value)
                                             }</Col>
                                     </Row>
                                 ))}

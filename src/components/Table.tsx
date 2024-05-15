@@ -94,6 +94,7 @@ interface TableProps {
     searchBoxClass?: string;
     tableClass?: string;
     theadClass?: string;
+    
 }
 
 const Table = (props: TableProps) => {
