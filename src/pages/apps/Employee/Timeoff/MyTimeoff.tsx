@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef }  from 'react';
+import React, { useState, useEffect, useRef,ChangeEvent}  from 'react';
 import { Link, Switch } from 'react-router-dom';
 import { Row, Col, Button, Card, Modal } from 'react-bootstrap';
 import CountUp from 'react-countup';
@@ -10,7 +10,8 @@ import { FormInput } from '../../../../components/';
 import config from '../../../../config';
 
 //dummy data
-import { timeoff, leavesStatsRecord } from './data';
+// import { timeoff, leavesStatsRecord } from './data';
+import { timeoff } from './data';
 import Loader from '../../../../components/Loader';
 import Today from '../../../dashboard/DashboardEmployee/Today';
 import BASE_URL from '../../../../Base_URL/base_url';
@@ -53,50 +54,113 @@ const NoteModal = ({modal, toggleModal, date, note}:{modal:any, toggleModal:any,
     );
 }
 
-const BalanceModal = ({balancemodal, toggleBalanceModal, balancetype}:{balancemodal:any, toggleBalanceModal:any, balancetype:any}) => {
+// const BalanceModal = ({balancemodal, toggleBalanceModal, balancetype,leaveList}:{balancemodal:any, toggleBalanceModal:any, balancetype:any, leaveList: LeaveDetail[]}) => {
+//     return (
+//         <>
+//          <Modal show={balancemodal} onHide={toggleBalanceModal} size={'sm'}>
+//                 <Modal.Header onHide={toggleBalanceModal} >
+//                     <h4 className="modal-title">{balancetype}</h4>
+//                 </Modal.Header>
+//                 <Modal.Body>
+//                     <h4 className='mt-0 text-secondary'>Balance</h4>
+//                     <p>
+//                     {(leaveList || []).map((item, index) => {
+//                         return (
+//                             item.leave_type === balancetype ?
+//                             <>
+//                                {Object.entries(item.LeaveBalance).map(([key, value]) => {
+//                                     return (
+//                                         <Row key={`leavesstatb-${index}-${key}`}>
+//                                             <Col xs={7}>{key}:</Col><Col xs={5} className='mb-1'><b>{value}</b></Col> 
+//                                         </Row>
+//                                         );
+//                                 })}
+//                             </>
+//                             : ''
+//                             );
+//                     })}
+//                     </p>
+//                     <hr/>
+//                     <h4 className='text-secondary'>Settings</h4>
+//                     <p>
+//                     {(leaveList|| []).map((item, index) => {
+//                         return (
+//                             item.leave_type === balancetype ?
+//                             <>
+//                                {Object.entries(item.LeaveSetting).map(([key, value]) => {
+//                                     return (
+//                                         <Row key={`leavesstats-${index}-${key}`}>
+//                                             <Col xs={7}>{key}:</Col><Col xs={5} className='mb-1'><b>{value}</b></Col> 
+//                                         </Row>
+//                                         );
+//                                 })}
+//                             </>
+//                             : ''
+//                             );
+//                     })}
+//                     </p>
+//                 </Modal.Body>
+//                 <Modal.Footer>
+//                     <Button variant="light" onClick={toggleBalanceModal}>
+//                         Close
+//                     </Button>
+//                 </Modal.Footer>
+//             </Modal>
+//         </>
+//     );
+// }
+const BalanceModal = ({ balancemodal, toggleBalanceModal, balancetype, leaveList }: { balancemodal: any; toggleBalanceModal: any; balancetype: any; leaveList: LeaveDetail[] }) => {
     return (
         <>
-         <Modal show={balancemodal} onHide={toggleBalanceModal} size={'sm'}>
-                <Modal.Header onHide={toggleBalanceModal} >
+            <Modal show={balancemodal} onHide={toggleBalanceModal} size={'sm'}>
+                <Modal.Header onHide={toggleBalanceModal}>
                     <h4 className="modal-title">{balancetype}</h4>
                 </Modal.Header>
                 <Modal.Body>
                     <h4 className='mt-0 text-secondary'>Balance</h4>
                     <p>
-                    {(leavesStatsRecord || []).map((item, index) => {
-                        return (
-                            item.text === balancetype ?
-                            <>
-                               {Object.entries(item.balance).map(([key, value]) => {
-                                    return (
-                                        <Row key={`leavesstatb-${index}-${key}`}>
-                                            <Col xs={7}>{key}:</Col><Col xs={5} className='mb-1'><b>{value}</b></Col> 
-                                        </Row>
-                                        );
-                                })}
-                            </>
-                            : ''
+                        {(leaveList || []).map((item, index) => {
+                            return (
+                                item.leave_type === balancetype ?
+                                    <>
+                                        {Object.entries(item.LeaveBalance).map(([key, value]) => {
+                                            if (key !== 'id' && key !== 'user_id' && key !== "carry_over_expiration") {
+                                         
+                                                const capitalizedKey = key.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+
+                                                return (
+                                                    <Row key={`leavesstatb-${index}-${key}`}>
+                                                        <Col xs={7}>{capitalizedKey.replace(/_/g, ' ')}:</Col><Col xs={5} className='mb-1'><b>{value}</b></Col>
+                                                    </Row>
+                                                );
+                                            }
+                                            return null;
+                                        })}
+                                    </>
+                                    : ''
                             );
-                    })}
+                        })}
                     </p>
-                    <hr/>
+                    <hr />
                     <h4 className='text-secondary'>Settings</h4>
                     <p>
-                    {(leavesStatsRecord || []).map((item, index) => {
-                        return (
-                            item.text === balancetype ?
-                            <>
-                               {Object.entries(item.settings).map(([key, value]) => {
-                                    return (
-                                        <Row key={`leavesstats-${index}-${key}`}>
-                                            <Col xs={7}>{key}:</Col><Col xs={5} className='mb-1'><b>{value}</b></Col> 
-                                        </Row>
-                                        );
-                                })}
-                            </>
-                            : ''
+                        {(leaveList || []).map((item, index) => {
+                            return (
+                                item.leave_type === balancetype ?
+                                    <>
+                                        {Object.entries(item.LeaveSetting).map(([key, value]) => {
+                                            if(key!=="id" && key !=="leave_type_id")
+                                           {     const capitalizedKey = key.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+                                             return (
+                                                <Row key={`leavesstats-${index}-${key}`}>
+                                                    <Col xs={7}>{capitalizedKey.replace(/_/g, ' ')}:</Col><Col xs={5} className='mb-1'><b>{value}</b></Col>
+                                                </Row>
+                                            );}
+                                        })}
+                                    </>
+                                    : ''
                             );
-                    })}
+                        })}
                     </p>
                 </Modal.Body>
                 <Modal.Footer>
@@ -108,6 +172,7 @@ const BalanceModal = ({balancemodal, toggleBalanceModal, balancetype}:{balancemo
         </>
     );
 }
+
 
 /* status column render */
 const StatusColumn = ({ row }: { row: any }) => {
@@ -142,7 +207,7 @@ const ActionColumn = ({ row }: { row: any }) => {
             <Button variant="light" onClick={toggleModal}>
                 <i className="mdi mdi-note-text-outline"></i> Note
             </Button>
-            <NoteModal modal={modal} toggleModal={toggleModal} date={row.original.date} note={row.original.note}/>
+            <NoteModal modal={modal} toggleModal={toggleModal} date={row.original.date} note={row.original.leave_notes}/>
         </> 
     );
 };
@@ -160,7 +225,7 @@ const DateFromColumn = ({ row }: { row: any }) => {
 const DateToColumn = ({ row }: { row: any }) => {
     return (
         <>
-            {new Date(row.original.date_from).toLocaleString(["en-GB"], {dateStyle:"medium"})}
+            {new Date(row.original.date_to).toLocaleString(["en-GB"], {dateStyle:"medium"})}
         </>
     );
 };
@@ -249,46 +314,178 @@ const sizePerPageList = [
 
 
 
+
+// const LeavesStats = () => {
+//     const [balancemodal, setBalanceModal] = useState<boolean>(false);
+//     const [balancetype, setBalanceType] = useState('');
+
+//     const[leaveList,setLeaveList]=useState([]);
+//     const toggleBalanceModal = () => {
+//         setBalanceModal((balancemodal) => !balancemodal);
+//     };
+//    useEffect(()=>{
+//     const fetchData=async()=>{
+//         try{
+//         const url="http://35.154.28.156/api/user-leave-assign-list";
+//         const headers={
+//             "Accept":"application/json",
+//             "Authorization":`Bearer ${config.API_TOKEN}`
+//         }
+//         var requestOptions={
+//             method:"GET",
+//             headers:headers
+//         }
+//         const response=await fetch(url,requestOptions);
+//         if(response.status===200)
+//          {   
+//         const result = await response.json();
+//         setLeaveList(result.data.leave_detail)
+//         console.log(result.data.leave_detail)}
+//         }
+//         catch(err){
+//             console.log(err)
+//         }
+//     }
+//   fetchData()
+//    },[])
+
+//     return (
+//         <Row>
+//             {(leaveList || []).map((item, index) => {
+//                 return (
+                    
+//                     <Col sm={4} lg={3} xl={3} key={`leavesstat-${index}`}>
+//                         <Card className="text-white bg-primary mb-0 border-0" >
+//                             <Card.Body className='p-2'>
+//                             <div className="d-flex align-items-start ">
+//                                 <div className="w-100">
+//                                     <Card.Title as="h2" className="text-white mb-1">
+//                                         {item.yearly_leave}
+//                                     </Card.Title>
+//                                     <Card.Text>
+//                                         {item.leave_typetext}
+//                                     </Card.Text>
+//                                 </div>
+//                                 <Link to="#" className="text-reset font-20" onClick={() => { setBalanceType(item.text); toggleBalanceModal();}}>
+//                                     <i className="mdi mdi-information-outline"></i>
+//                                 </Link>
+//                             </div>
+//                             </Card.Body>
+//                         </Card>
+//                     </Col>
+                   
+//                 );
+//             })}
+//             <BalanceModal balancemodal={balancemodal} toggleBalanceModal={toggleBalanceModal} balancetype={balancetype}/>
+                   
+//         </Row>
+//     );
+// }
+interface LeaveDetail {
+    // id: number;
+    leave_type: string;
+    yearly_leave: number;
+    remaining_leave: number;
+    LeaveBalance: {
+        // id: number;
+        // user_id: number;
+        // Yearly_Entitlement: number;
+        remaining_leave: number;
+        carry_over: number;
+        total_balance: number;
+        carry_over_expiration: string;
+        taken: number;
+    };
+    LeaveSetting: {
+        id: number;
+        leave_type_id: number;
+        paid_time_off: string;
+        accurual_frequency: string;
+        prorate_accurual: string;
+        max_carry_over: string;
+        carry_over_expiration: string;
+    };
+}
+
 const LeavesStats = () => {
     const [balancemodal, setBalanceModal] = useState<boolean>(false);
     const [balancetype, setBalanceType] = useState('');
+
+    const [leaveList, setLeaveList] = useState<LeaveDetail[]>([]);
     const toggleBalanceModal = () => {
         setBalanceModal((balancemodal) => !balancemodal);
     };
 
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const url = `${BASE_URL}/api/user-leave-assign-list`;
+                const headers = {
+                    "Accept": "application/json",
+                    "Authorization": `Bearer ${config.API_TOKEN}`
+                };
+                var requestOptions = {
+                    method: "GET",
+                    headers: headers
+                };
+                const response = await fetch(url, requestOptions);
+                if (response.status === 200) {
+                    const result = await response.json();
+                    // const modifiedData=result.data.leave_detail.map((item: LeaveDetail)=>(
+                    //     {...item,
+                    //         LeaveBalance:{
+                    //             ...item.LeaveBalance,
+                    //             Yearly_Entitlement:item.yearly_leave,
+                    //             Carry_Over:item.LeaveBalance.carry_over,
+                    //         },
+                    //         LeaveSetting:{
+                    //             ...item.LeaveSetting,
+                    //             Maximum_Carry_Over: item.LeaveSetting.max_carry_over
+                    //         }
+                    //     }
+                       
+                    // ))
+                    setLeaveList(result.data.leave_detail);
+                    console.log(result.data.leave_detail);
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        };
+        fetchData();
+    }, []);
 
     return (
         <Row>
-            {(leavesStatsRecord || []).map((item, index) => {
+            {(leaveList || []).map((item, index) => {
                 return (
-                    
                     <Col sm={4} lg={3} xl={3} key={`leavesstat-${index}`}>
                         <Card className="text-white bg-primary mb-0 border-0" >
                             <Card.Body className='p-2'>
-                            <div className="d-flex align-items-start ">
-                                <div className="w-100">
-                                    <Card.Title as="h2" className="text-white mb-1">
-                                        {item.value}
-                                    </Card.Title>
-                                    <Card.Text>
-                                        {item.text}
-                                    </Card.Text>
+                                <div className="d-flex align-items-start ">
+                                    <div className="w-100">
+                                        <Card.Title as="h2" className="text-white mb-1">
+                                            {`${item.yearly_leave}`.padStart(2,"0")} Days
+                                        </Card.Title>
+                                        <Card.Text>
+                                            {item.leave_type}
+                                        </Card.Text>
+                                    </div>
+                                    <Link to="#" className="text-reset font-20" onClick={() => { setBalanceType(item.leave_type); toggleBalanceModal(); }}>
+                                        <i className="mdi mdi-information-outline"></i>
+                                    </Link>
                                 </div>
-                                <Link to="#" className="text-reset font-20" onClick={() => { setBalanceType(item.text); toggleBalanceModal();}}>
-                                    <i className="mdi mdi-information-outline"></i>
-                                </Link>
-                            </div>
                             </Card.Body>
                         </Card>
                     </Col>
-                   
                 );
             })}
-            <BalanceModal balancemodal={balancemodal} toggleBalanceModal={toggleBalanceModal} balancetype={balancetype}/>
-                   
+            <BalanceModal balancemodal={balancemodal} toggleBalanceModal={toggleBalanceModal} balancetype={balancetype} leaveList={leaveList}
+            />
         </Row>
     );
 }
+
 
 let backuptimeofflist = [...timeoff];
 let filtervalue_status = 'All';
@@ -298,6 +495,8 @@ const MyTimeoff = () => {
     const [timeofflist, setTimeoffList] = useState([...timeoff]);
     const [loading, setLoading] = useState(true);
    
+    const [selectedDateFrom, setSelectedDateFrom] = useState<Date | null>(null); // Initialize as null
+    const [selectedDateTo, setSelectedDateTo] = useState<Date | null>(null);
 
 
     useEffect(() => {
@@ -358,6 +557,75 @@ const MyTimeoff = () => {
         console.log(filtervalue_type +' '+ filtervalue_status  );
       }; */
 
+    
+
+    //   const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
+    //     const selectedDate = new Date(e.target.value);
+    //     const fieldName = e.target.name;
+    
+    //     // Determine which date field is being changed and update the corresponding state
+    //     if (fieldName === 'date-from') {
+    //         setSelectedDateFrom(selectedDate);
+    //     } else if (fieldName === 'date-to') {
+    //         setSelectedDateTo(selectedDate);
+    //     }
+    
+    //     // If both start and end dates are selected, filter the data
+    //     if (selectedDateFrom && selectedDateTo) {
+    //         // Adjust end date to include the entire selected day
+    //         const adjustedEndDate = new Date(selectedDateTo.getTime() + (24 * 60 * 60 * 1000));
+    
+    //         const filteredList = backuptimeofflist.filter((day) => {
+    //             const startDate = new Date(day.date_from);
+    //             const endDate = new Date(day.date_to);
+    
+    //             // Adjust end date to include the entire day
+    //             endDate.setDate(endDate.getDate() + 1);
+    
+    //             return startDate >= selectedDateFrom && endDate <= adjustedEndDate;
+    //         });
+    
+    //         setTimeoffList(filteredList);
+    //     }
+    // };
+    
+    const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const selectedDate = new Date(e.target.value);
+        const fieldName = e.target.name;
+    
+        // Determine which date field is being changed and update the corresponding state
+        if (fieldName === 'date-from') {
+            setSelectedDateFrom(selectedDate);
+        } else if (fieldName === 'date-to') {
+            setSelectedDateTo(selectedDate);
+        }
+    };
+    
+    useEffect(() => {
+        // If both start and end dates are selected, filter the data
+        if (selectedDateFrom && selectedDateTo) {
+            // Adjust end date to include the entire selected day
+            const adjustedEndDate = new Date(selectedDateTo.getTime() + (24 * 60 * 60 * 1000));
+    
+            const filteredList = backuptimeofflist.filter((day) => {
+                const startDate = new Date(day.date_from);
+                const endDate = new Date(day.date_to);
+    
+                // Adjust end date to include the entire day
+                endDate.setDate(endDate.getDate() + 1);
+    
+                return startDate >= selectedDateFrom && endDate <= adjustedEndDate;
+            });
+    
+            setTimeoffList(filteredList);
+        }
+    }, [selectedDateFrom, selectedDateTo]);
+    
+   
+
+ 
+
+    
     const methods = useForm({
         defaultValues: {
             password: '12345',
@@ -408,6 +676,18 @@ const MyTimeoff = () => {
                                 <h4 className="header-title mb-2">My Requests</h4>
                                 </Col>
                                 <Col sm={6} lg={2} xl={2} className='pr-desktop-0'>
+                                    {/* <FormInput
+                                        label=""
+                                        type="date"
+                                        name="date-from"
+                                        containerClass={'mb-1'}
+                                        register={register}
+                                        key="date-from"
+                                        errors={errors}
+                                        control={control}
+                                    
+                                    /> */}
+
                                     <FormInput
                                         label=""
                                         type="date"
@@ -417,10 +697,15 @@ const MyTimeoff = () => {
                                         key="date-from"
                                         errors={errors}
                                         control={control}
+                                        onChange={(e) => {
+                                            setSelectedDateFrom(new Date(e.target.value)); // Set selected start date
+                                            handleDateChange(e);
+                                        }}
                                     />
+
                                 </Col>
                                 <Col sm={6} lg={2} xl={2} className='pr-desktop-0'>
-                                    <FormInput
+                                    {/* <FormInput
                                         label=""
                                         type="date"
                                         name="date-to"
@@ -429,8 +714,23 @@ const MyTimeoff = () => {
                                         key="date-to"
                                         errors={errors}
                                         control={control}
-                                        
-                                    />
+                                     
+                                    /> */}
+
+                                        <FormInput
+                                            label=""
+                                            type="date"
+                                            name="date-to"
+                                            containerClass={'mb-1'}
+                                            register={register}
+                                            key="date-to"
+                                            errors={errors}
+                                            control={control}
+                                            onChange={(e) => {
+                                                setSelectedDateTo(new Date(e.target.value)); // Set selected end date
+                                                handleDateChange(e);
+                                            }}
+                                        />
                                 </Col>
                                 <Col sm={6} lg={2} xl={2} className='pr-desktop-0'>
                                     <FormInput

@@ -4,6 +4,7 @@ import { Row, Col, Button, Card, Modal } from 'react-bootstrap';
 import CountUp from 'react-countup';
 import { useForm } from 'react-hook-form';
 import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
+
 // components
 import PageTitle from '../../../../components/PageTitle';
 import Table from '../../../../components/Table';
@@ -11,6 +12,8 @@ import { FormInput } from '../../../../components/';
 import { APICore } from '../../../../helpers/api/apiCore';
 import config from '../../../../config';
 //dummy data
+import { dummydata } from './data';
+
 //import { dummydata as data } from './data';
 import Loader from '../../../../components/Loader';
 import Today from '../../../dashboard/DashboardEmployee/Today';
@@ -53,7 +56,7 @@ const ActionColumn = ({ row }: { row: any }) => {
             <Button variant="light" onClick={toggleModal}>
                 <i className="mdi mdi-note-text-outline"></i> Note
             </Button>
-            <NoteModal modal={modal} toggleModal={toggleModal} date={row.original.date} note={row.original.note}/>
+            <NoteModal modal={modal} toggleModal={toggleModal} date={row.original.date} note={row.original.notes}/>
         </> 
     );
 };
@@ -146,9 +149,11 @@ const MyAttendance = () => {
     const [attendancedata, setAttendanceData] = useState<AttendanceProps[]>([]);
     const [attendancestatsdata, setAttendanceStatsData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [currentmonth, setCurrentMonth] = useState(new Date().getMonth()+1);
-    const [defaultmonth, setDefaultMonth] = useState(new Date().getMonth()+1);
+   
+    const [error, setError] = useState<string | null>(null);
+
+    const [currentmonth, setCurrentMonth] = useState(new Date().getMonth());
+    const [defaultmonth, setDefaultMonth] = useState(new Date().getMonth());
     const [defaultattentype, setDefaultAttenType] = useState('attentype-all');
    
     function getMonthRange(month:number) { 
@@ -167,92 +172,144 @@ const MyAttendance = () => {
             case 11: return '1 Dec - 31 Dec';
         }
     };
+   
+
     useEffect(() => {
         const fetchData = async () => {
-          try {
-            setLoading(true);
-            const url = `${BASE_URL}/api/get-user-attendance`;
-            const headers = {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${config.API_TOKEN}`
-              };
-             const formdata = new FormData();
+            try {
+                setLoading(true);
+                const url = `${BASE_URL}/api/get-user-attendance`;
+                const headers = {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${config.API_TOKEN}`
+                };
+                const formdata = new FormData();
                 formdata.append("year", new Date().getFullYear().toString());
-                formdata.append("user_id", "2");
-                formdata.append("filter_type", "1");
-              var requestOptions = {
-                method: 'POST',
-                headers: headers,
-                body:formdata
-              };
-            const response = await fetch(url, requestOptions); 
-            if(response.status === 200){
-                const result = await response.json();
-                console.log(result.data[0].notes)
-                setAttendanceData(result.data);
-                setAttendanceStatsData(result.data);
+                formdata.append("month", getMonthName(currentmonth) || "");
+    
+                var requestOptions = {
+                    method: 'POST',
+                    headers: headers,
+                    body: formdata
+                };
+                const response = await fetch(url, requestOptions);
+                if (response.status === 200) {
+                    const result = await response.json();
+                    console.log(result.data);
+                    setAttendanceData(result.data);
+                    setAttendanceStatsData(result.data);
+                } else {
+                    setError("Failed to fetch attendance data");
+                }
+            } catch (error) {
+                console.log(error);
+                setError("An error occurred while fetching data");
+            } finally {
+                setLoading(false);
             }
-            // else{
-            //     console.error("Failed to fetach attendence data")
-            // }
-        } 
-            
-
-          
-          catch (error) {
-            console.log(error);
-          } finally {
-            setLoading(false);
-          } 
         };
     
         fetchData();
-      }, [currentmonth]);
+    }, [currentmonth]);
+    
+    
+    
+      /* time to column render */
+    // const ClockinColumn = ({ row }: { row: any }) => {
+    //     function convertTo12HourFormat(time24:any) {
+    //         if(time24){
+    //         var [hours, minutes, seconds] = time24.split(':');
+    //         var suffix = hours >= 12 ? 'PM' : 'AM';
+    //         hours = (hours % 12) || 12;
+    //         //minutes = minutes.padStart(2, '0'); // Formatting minutes to always have two digits
+    //         var time12 = hours + ':' + minutes + ':' + seconds + ' ' + suffix;
+    //         return time12;}
+    //         else return '';
+    //     }
+    //     return (
+    //         <>
+           
+    //             {convertTo12HourFormat(row.original.clock_in_time)}
+    //         </>
+    //     );
+    // };
+
+    
 
       /* time to column render */
-    const ClockinColumn = ({ row }: { row: any }) => {
-        function convertTo12HourFormat(time24:any) {
-            if(time24){
-            var [hours, minutes, seconds] = time24.split(':');
-            var suffix = hours >= 12 ? 'PM' : 'AM';
-            hours = (hours % 12) || 12;
-            //minutes = minutes.padStart(2, '0'); // Formatting minutes to always have two digits
-            var time12 = hours + ':' + minutes + ':' + seconds + ' ' + suffix;
-            return time12;}
-            else return '';
-        }
-        return (
-            <>
-                {convertTo12HourFormat(row.original.clock_in_time)}
-            </>
-        );
-    };
+    //   const ClockoutColumn = ({ row }: { row: any }) => {
+    //     function convertTo12HourFormat(time24:any) {
+    //         if(time24){
+    //         var [hours, minutes, seconds] = time24.split(':');
+    //         var suffix = hours >= 12 ? 'PM' : 'AM';
+    //         hours = (hours % 12) || 12;
+    //         //minutes = minutes.padStart(2, '0'); // Formatting minutes to always have two digits
+    //         var time12 = hours + ':' + minutes + ':' + seconds + ' ' + suffix;
+    //         return time12;}
+    //         else return '';
+    //     }
+    //
+    //     return (
+    //         <>
+    //            {row.original.clock_out_time && convertTo12HourFormat(row.original.clock_out_time)}
+    //         </>
+    //     );
+    // };
+     
 
-      /* time to column render */
-      const ClockoutColumn = ({ row }: { row: any }) => {
-        function convertTo12HourFormat(time24:any) {
-            if(time24){
-            var [hours, minutes, seconds] = time24.split(':');
-            var suffix = hours >= 12 ? 'PM' : 'AM';
-            hours = (hours % 12) || 12;
-            //minutes = minutes.padStart(2, '0'); // Formatting minutes to always have two digits
-            var time12 = hours + ':' + minutes + ':' + seconds + ' ' + suffix;
-            return time12;}
-            else return '';
-        }
-        return (
-            <>
-                {convertTo12HourFormat(row.original.clock_out_time)}
-            </>
-        );
-    };
 
-      
+function convertTo12HourFormat(time24: any) {
+    if (time24) {
+        var [hours, minutes,seconds] = time24.split(':');
+        var parsedHours = parseInt(hours, 10);
+        var suffix = parsedHours >= 12 ? 'PM' : 'AM';
+        var displayHours = parsedHours % 12 || 12;
+        var displayMinutes = parseInt(minutes, 10).toString().padStart(2,"0"); // Remove leading zeros from minutes
+        return `${displayHours}:${displayMinutes} ${suffix}`;
+    } else {
+        return '';
+    }
+}
+
+
+const ClockinColumn = ({ row }: { row: any }) => {
+    return (
+        <>
+            {/* {convertTo12HourFormat(row.original.clock_in_time)} */}
+               {row.original.clock_in_time}
+        </>
+    );
+};
+
+const ClockoutColumn = ({ row }: { row: any }) => {
+    return (
+        <>
+            {/* {convertTo12HourFormat(row.original.clock_out_time)} */}
+            {row.original.clock_out_time}
+        </>
+    );
+};
+
+const formatDate = ({ row }: { row: { original: { clock_in_date: string } } }) => {
+    if (!row.original.clock_in_date) {
+        return ''; // or any other default value you prefer
+    }
+    const date = new Date(row.original.clock_in_date);
+    const formattedDate = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    return formattedDate;
+};
+
+
+
+
+ 
     const columns = [
         {
             Header: 'Date',
             accessor: 'clock_in_date',
             sort: true,
+            Cell:formatDate
         },
         {
             Header: 'Day',
@@ -273,7 +330,7 @@ const MyAttendance = () => {
         },
         {
             Header: 'Scheduled Hours',
-            accessor: 'scheduled_hours',
+            accessor: 'schedule_hours',
             sort: false,
         },
         {
@@ -404,10 +461,10 @@ const MyAttendance = () => {
                                 </Col>
                             </Row>
                             <hr></hr>
-                            <AttendanceStats stats={attendancestatsdata}/> 
+                            {/* <AttendanceStats stats={attendancestatsdata}/>  */}
                             <hr></hr>
                             
-                            <Table
+                            {/* <Table
                                 columns={columns}
                                 data={attendancedata}
                                 pageSize={10}
@@ -417,7 +474,20 @@ const MyAttendance = () => {
                                 isSearchable={true}
                                 tableClass="table-striped dt-responsive nowrap w-100"
                                 searchBoxClass="my-2"
-                            />
+                            /> */}
+                             {loading ? <Loader /> : (
+                <Table
+                    columns={columns}
+                    data={attendancedata}
+                    pageSize={10}
+                    sizePerPageList={sizePerPageList}
+                    isSortable={true}
+                    pagination={true}
+                    isSearchable={true}
+                    tableClass="table-striped dt-responsive nowrap w-100"
+                    searchBoxClass="my-2"
+                />
+            )}
                         </Card.Body>
                     </Card>
                 </Col>

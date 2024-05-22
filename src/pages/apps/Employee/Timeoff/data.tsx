@@ -28,7 +28,7 @@ const timeoff: TimeoffProps[] = [
         leave_type_id: "-",
         leave_notes: "-",
         attachment: "-",
-        status:"pending"
+        status:"-"
     },    
 ];
 

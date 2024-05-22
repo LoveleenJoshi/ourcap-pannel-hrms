@@ -12,6 +12,8 @@ import BASE_URL from '../../../Base_URL/base_url';
 
 import Anouncements from './Announcements';
 import Announcements from './Announcements';
+import { holidayList } from './data';
+import DataNotAvailable from '../../../DataNotAvailable/DataNotAvailable';
 // import { emplyeesonleaveList, holidayList } from './data';
 
 interface Holiday {
@@ -44,51 +46,54 @@ interface Announcement {
   images: string;
   created_at: string;
   name: string;
+  date:string;
 }
 
 const Dashboard = () => {
   const [holidaylist, setHolidayList] = useState<Holiday[]>([]);
   const [leaveList,setLeaveList]=useState<EmployeesOnleave[]>([]);
   const [announcements,setAnnouncements]=useState<Announcement[]>([]);
+  const [dataAvailable, setDataAvailable] = useState(true);
   // const [employeeLeaveList,setEmploeeLeaveList]=useState<EmployeesOnLeave[]>([]);
   // const [loading,setLoading]=useState(true)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
 
-        const url = `${BASE_URL}/api/get-holiday`;
-        const headers = {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${config.API_TOKEN}`
-          };
+  //       const url = `${BASE_URL}/api/get-holiday`;
+  //       const headers = {
+  //           'Accept': 'application/json',
+  //           'Authorization': `Bearer ${config.API_TOKEN}`
+  //         };
          
-          const requestOptions = {
-            method: 'GET',
-            headers: headers,
-          };
-        const response = await fetch(url, requestOptions); 
-        if(response.status===201){
-            const result = await response.json();
-            setHolidayList(result.data.holiday);
-            console.log()
-        }else{
-          console.error("Failed to fetch Holidays : " )
-        }
+  //         const requestOptions = {
+  //           method: 'GET',
+  //           headers: headers,
+  //         };
+  //       const response = await fetch(url, requestOptions); 
+  //       if(response.status===201){
+  //           const result = await response.json();
+  //           setHolidayList(result.data.holiday);
+  //           console.log()
+  //       }else{
+  //         console.error("Failed to fetch Holidays : " )
+  //       }
 
-      } catch (error:any) {
-        console.error(error);
-      } 
-    };
+  //     } catch (error:any) {
+  //       console.error(error);
+  //     } 
+  //   };
 
-    fetchData(); 
-  }, []);
+  //   fetchData(); 
+  // }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
 
         const url = `${BASE_URL}/api/dashboard`;
+        
         const headers = {
             'Accept': 'application/json',
             'Authorization': `Bearer ${config.API_TOKEN}`
@@ -100,54 +105,35 @@ const Dashboard = () => {
           };
         const response = await fetch(url, requestOptions); 
         if(response.status===200){
-            const result = await response.json();
+          const result = await response.json();
           setLeaveList(result.data.leave);
-          // setAnnouncements(result.data.news)
-            console.log(result.data)
-        }else{
-          console.error("Failed to fetch Holidays : " )
-        }
-
-      } catch (error:any) {
-        console.error(error);
-      } 
-    };
-
-    fetchData(); 
-  }, []);
-
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-
-        const url = `${BASE_URL}/api/user`;
-        const headers = {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${config.API_TOKEN}`
-          };
-         
-          const requestOptions = {
-            method: 'GET',
-            headers: headers,
-          };
-        const response = await fetch(url, requestOptions); 
-        if(response.status===200){
-            const result = await response.json();
-       
           setAnnouncements(result.data.news)
-            console.log(result.data)
+          setHolidayList(result.data.holidays);
+          setDataAvailable(true)
+          
+         
+          
+          
+          
+        
         }else{
+          setDataAvailable(false)
           console.error("Failed to fetch Holidays : " )
         }
 
       } catch (error:any) {
+        setDataAvailable(false);
         console.error(error);
       } 
     };
 
     fetchData(); 
   }, []);
+
+  if (!dataAvailable) {
+    return <DataNotAvailable />;
+}
+  
 
 
     return (

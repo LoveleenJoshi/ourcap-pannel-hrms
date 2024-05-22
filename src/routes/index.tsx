@@ -166,6 +166,7 @@ const MyAttendance = React.lazy(() => import('../pages/apps/Employee/Attendance/
 const MyTimeoff = React.lazy(() => import('../pages/apps/Employee/Timeoff/MyTimeoff'));
 const NewTimeoff = React.lazy(() => import('../pages/apps/Employee/Timeoff/NewTimeoff'));
 const Profile = React.lazy(() => import('../pages/apps/Employee/Profile/'));
+const DataNotAvailable=React.lazy(()=>import("../DataNotAvailable/DataNotAvailable"))
 
 export interface RoutesProps {
     path: RouteProps['path'];
@@ -340,6 +341,14 @@ const ecommerceAppRoutes = {
     ],
 };
 
+
+//Data Not Available
+const dataNotAvailableRoute = {
+    path: '/data-not-available',
+    name: 'Data Not Available',
+    component: DataNotAvailable,
+    route: Route, // Use PrivateRoute if it should be protected
+}; 
 const crmAppRoutes = {
     path: '/apps/crm',
     name: 'CRM',
