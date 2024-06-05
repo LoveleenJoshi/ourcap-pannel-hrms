@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef,ChangeEvent}  from 'react';
+import { useForm } from 'react-hook-form';
 import { Link, Switch } from 'react-router-dom';
 import { Row, Col, Button, Card, Modal } from 'react-bootstrap';
 import CountUp from 'react-countup';
-import { useForm } from 'react-hook-form';
 // components
 import PageTitle from '../../../../components/PageTitle';
 import Table from '../../../../components/Table';
@@ -12,9 +12,11 @@ import config from '../../../../config';
 //dummy data
 // import { timeoff, leavesStatsRecord } from './data';
 import { timeoff } from './data';
-import Loader from '../../../../components/Loader';
+// import Loader from '../../../../components/Loader';
 import Today from '../../../dashboard/DashboardEmployee/Today';
 import BASE_URL from '../../../../Base_URL/base_url';
+import DataNotAvailable from '../../../../DataNotAvailable/DataNotAvailable';
+import Spinner from "../../../../components/Spinner";
 
 interface TimeoffProps {
     leaveId: number
@@ -130,7 +132,7 @@ const BalanceModal = ({ balancemodal, toggleBalanceModal, balancetype, leaveList
 
                                                 return (
                                                     <Row key={`leavesstatb-${index}-${key}`}>
-                                                        <Col xs={7}>{capitalizedKey.replace(/_/g, ' ')}:</Col><Col xs={5} className='mb-1'><b>{value}</b></Col>
+                                                        <Col xs={7}>{capitalizedKey.replace(/_/g, ' ')}:</Col><Col xs={5} className='mb-1'><b>{value===null ?0:value}</b></Col>
                                                     </Row>
                                                 );
                                             }
@@ -412,6 +414,7 @@ const LeavesStats = () => {
     const [balancetype, setBalanceType] = useState('');
 
     const [leaveList, setLeaveList] = useState<LeaveDetail[]>([]);
+  
     const toggleBalanceModal = () => {
         setBalanceModal((balancemodal) => !balancemodal);
     };
@@ -447,14 +450,17 @@ const LeavesStats = () => {
                     // ))
                     setLeaveList(result.data.leave_detail);
                     console.log(result.data.leave_detail);
+                    
                 }
             } catch (err) {
                 console.log(err);
+                
             }
         };
         fetchData();
     }, []);
 
+    
     return (
         <Row>
             {(leaveList || []).map((item, index) => {
@@ -465,7 +471,8 @@ const LeavesStats = () => {
                                 <div className="d-flex align-items-start ">
                                     <div className="w-100">
                                         <Card.Title as="h2" className="text-white mb-1">
-                                            {`${item.yearly_leave}`.padStart(2,"0")} Days
+                                            {/* {`${item.LeaveBalance.remaining_leave}`.padStart(2,"0")} Days */}
+                                                  {`${item.LeaveBalance.total_balance===null ?0:item.LeaveBalance.total_balance}`.padStart(2,"0")} Days 
                                         </Card.Title>
                                         <Card.Text>
                                             {item.leave_type}
@@ -494,14 +501,32 @@ let filtervalue_type = 'all';
 const MyTimeoff = () => {
     const [timeofflist, setTimeoffList] = useState([...timeoff]);
     const [loading, setLoading] = useState(true);
+    const [selectedLeaveType,setSelectedLeaveType]=useState("All");
+    const [selectedLeaveStatus,setSelectedStatus]=useState("all");
    
-    const [selectedDateFrom, setSelectedDateFrom] = useState<Date | null>(null); // Initialize as null
+    const [selectedDateFrom, setSelectedDateFrom] = useState<Date | null>(null); 
     const [selectedDateTo, setSelectedDateTo] = useState<Date | null>(null);
+    const [dataAvailable,setDataAvailable]=useState(true);
 
+
+    const methods = useForm({
+        defaultValues: {
+            password: '12345',
+            statictext: 'email@example.com',
+            color: '#727cf5',
+        },
+    });
+    const {
+        handleSubmit,
+        register,
+        control,
+        formState: { errors },
+    } = methods;
 
     useEffect(() => {
         const fetchData = async () => {
           try {
+            setLoading(true)
             const url = `${BASE_URL}/api/get-single-user-leave-list`;
             const headers = {
                 'Accept': 'application/json',
@@ -516,12 +541,19 @@ const MyTimeoff = () => {
             if(response.status === 200){
                 const result = await response.json();
                 setTimeoffList(result.data.list);
+                setDataAvailable(true);
                 backuptimeofflist = [...result.data.list]; 
-                
+                setLoading(false)
+            }
+            else{
+                setDataAvailable(false)
+                setLoading(false)
             }
     
           } catch (error:any) {
             console.log(error);
+            setDataAvailable(false)
+            setLoading(false)
           } finally {
             setLoading(false);
           } 
@@ -530,25 +562,97 @@ const MyTimeoff = () => {
         fetchData(); 
       }, []);
 
-       const handleTypeFilter = (e:any) => {
-        const filter = e.target.value; 
-        if(!(filter === 'All')){
-        const tempArray = [...timeoff]; tempArray.pop(); 
-        {(backuptimeofflist || []).map((day, index) => {
-            if(day.leave_type_id === filter) { tempArray.push(day)}
-        })}
-        setTimeoffList(tempArray);} else {setTimeoffList(backuptimeofflist)}
-      };
+     
+      
+    //   useEffect(() => {
+    //     // If both start and end dates are selected, filter the data
+    //     if (selectedDateFrom && selectedDateTo) {
+    //         // Adjust end date to include the entire selected day
+    //         const adjustedEndDate = new Date(selectedDateTo.getTime() + (24 * 60 * 60 * 1000));
+    
+    //         const filteredList = backuptimeofflist.filter((day) => {
+    //             const startDate = new Date(day.date_from);
+    //             const endDate = new Date(day.date_to);
+    
+    //             // Adjust end date to include the entire day
+    //             endDate.setDate(endDate.getDate() + 1);
+    
+    //             return startDate >= selectedDateFrom && endDate <= adjustedEndDate;
+    //         });
+    
+    //         setTimeoffList(filteredList);
+    //     }
+    // }, [selectedDateFrom, selectedDateTo]);
 
-      const handleStatusFilter = (e:any) => {
-        const filter = e.target.value; 
-        if(!(filter === 'all')){
-        const tempArray = [...timeoff]; tempArray.pop(); 
-        {(backuptimeofflist || []).map((day, index) => {
-            if(day.status === filter) { tempArray.push(day)}
-        })}
-        setTimeoffList(tempArray);} else {setTimeoffList(backuptimeofflist)}
-      }; 
+
+
+    useEffect(() => {
+        const filterData = () => {
+            let filteredList = [...backuptimeofflist];
+    
+            if (selectedDateFrom && selectedDateTo) {
+                const adjustedEndDate = new Date(selectedDateTo.getTime() + (24 * 60 * 60 * 1000));
+    
+                filteredList = filteredList.filter((day) => {
+                    const startDate = new Date(day.date_from);
+                    const endDate = new Date(day.date_to);
+                    endDate.setDate(endDate.getDate() + 1);
+    
+                    return startDate >= selectedDateFrom && endDate <= adjustedEndDate;
+                });
+            }
+    
+            if (selectedLeaveType !== 'All') {
+                filteredList = filteredList.filter(day => day.leave_type_id === selectedLeaveType);
+            }
+    
+            if (selectedLeaveStatus !== 'all') {
+                filteredList = filteredList.filter(day => day.status === selectedLeaveStatus);
+            }
+    
+            setTimeoffList(filteredList);
+        };
+    
+        filterData();
+    }, [selectedDateFrom, selectedDateTo, selectedLeaveType, selectedLeaveStatus]);
+    
+
+    if(!dataAvailable){
+        return <DataNotAvailable/>
+      }
+
+
+      if(loading){
+        return(
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Spinner size="md" type="bordered" color="primary">
+            <span className="sr-only">Loading...</span>
+        </Spinner>
+    </div>
+        )
+     }
+
+    //    const handleTypeFilter = (e:any) => {
+    //     const filter = e.target.value; 
+        
+
+    //     if(!(filter === 'All')){
+    //     const tempArray = [...timeoff]; tempArray.pop(); 
+    //     {(backuptimeofflist || []).map((day, index) => {
+    //         if(day.leave_type_id === filter) { tempArray.push(day)}
+    //     })}
+    //     setTimeoffList(tempArray);} else {setTimeoffList(backuptimeofflist)}
+    //   };
+
+    //   const handleStatusFilter = (e:any) => {
+    //     const filter = e.target.value; 
+    //     if(!(filter === 'all')){
+    //     const tempArray = [...timeoff]; tempArray.pop(); 
+    //     {(backuptimeofflist || []).map((day, index) => {
+    //         if(day.status === filter) { tempArray.push(day)}
+    //     })}
+    //     setTimeoffList(tempArray);} else {setTimeoffList(backuptimeofflist)}
+    //   }; 
 
      /*  const handleStatusFilter = (e:any) => {filtervalue_status = e.target.value; handleFilter()};
       const handleTypeFilter = (e:any) => {filtervalue_type = e.target.value; handleFilter()};
@@ -601,46 +705,20 @@ const MyTimeoff = () => {
         }
     };
     
-    useEffect(() => {
-        // If both start and end dates are selected, filter the data
-        if (selectedDateFrom && selectedDateTo) {
-            // Adjust end date to include the entire selected day
-            const adjustedEndDate = new Date(selectedDateTo.getTime() + (24 * 60 * 60 * 1000));
+   const handleStatusFilter=(e:any)=>{
+  setSelectedStatus(e.target.value)
+   }
     
-            const filteredList = backuptimeofflist.filter((day) => {
-                const startDate = new Date(day.date_from);
-                const endDate = new Date(day.date_to);
-    
-                // Adjust end date to include the entire day
-                endDate.setDate(endDate.getDate() + 1);
-    
-                return startDate >= selectedDateFrom && endDate <= adjustedEndDate;
-            });
-    
-            setTimeoffList(filteredList);
-        }
-    }, [selectedDateFrom, selectedDateTo]);
-    
-   
+   const handleTypeFilter=(e:any)=>{
+    setSelectedLeaveType(e.target.value)
+   }
 
  
 
     
-    const methods = useForm({
-        defaultValues: {
-            password: '12345',
-            statictext: 'email@example.com',
-            color: '#727cf5',
-        },
-    });
-    const {
-        handleSubmit,
-        register,
-        control,
-        formState: { errors },
-    } = methods;
+    
 
-    if(loading) return <Loader></Loader>; 
+    // if(loading) return <Loader></Loader>; 
     return (
         <>
              <Row>

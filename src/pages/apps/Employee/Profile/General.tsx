@@ -385,7 +385,7 @@ const General: React.FC<GeneralProps & AddressProp & EmergencyProp & BankProp> =
                     </Button>)}
                     {isPersonalEditing && (
                          <div className="d-flex justify-content-end">
-                         <Button  className="me-2 btn btn-light" onClick={handlePersonalCancelClick}>
+                         <Button  className="me-2" variant='light' onClick={handlePersonalCancelClick}>
                              Cancel
                          </Button>
                          <Button variant="primary" onClick={handleSubmit(onPersonalSubmit)}>

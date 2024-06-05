@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, Button, Row, Col } from 'react-bootstrap';
 import classnames from 'classnames';
-
+import config from '../../../../config';
 // dummy data
 // import { employment, probation, job } from './data';
 import Table from '../../../../components/Table';
@@ -23,10 +23,57 @@ import Table from '../../../../components/Table';
 /* action column render */
 
 const ActionColumn = ({ row }: { row: any }) => {
+    const handleDownload = async () => {
+        // Check if the contract URL is available
+        if (!row.original.contract || row.original.contract.trim() === "") {
+            alert("There is no data available.");
+            return;
+        }
+
+        try {
+            // Log the download attempt
+            console.log('Downloading file from:', row.original.contract);
+
+            // Fetch the file as a Blob
+            const response = await fetch(row.original.contract, {
+                method: 'GET', // Assuming GET, update if necessary
+                headers: {
+                    'Authorization': `Bearer ${config.API_TOKEN}`, // If needed
+                    'Content-Type': 'application/pdf',
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch the file: ${response.statusText}`);
+            }
+
+            const blob = await response.blob();
+
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            const filename = row.original.contract.split('/').pop() || 'download.pdf';
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            alert("Your file has been downloaded!");
+        } catch (error) {
+            console.error('Download error:', error);
+            alert("Failed to download the file.");
+        }
+    };
+
     
     return (
         <>
-            <Button variant="light" >
+            <Button variant="light" onClick={handleDownload} >
                 <i className="mdi mdi-download"></i> 
             </Button>
         </> 
@@ -121,7 +168,7 @@ interface JobTimeline {
     position_type: string;
     employement_type: string;
     department: string;
-    contract: any;
+    contract: string;
 }
 interface JobTimelineProp {
     JobTimeLineDataProp: JobTimeline[]; 

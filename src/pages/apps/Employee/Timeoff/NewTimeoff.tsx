@@ -22,6 +22,7 @@ import avatar7 from '../../../../assets/images/users/user-5.jpg';
 import avatar8 from '../../../../assets/images/users/user-1.jpg';
 import BASE_URL from '../../../../Base_URL/base_url';
 import config from '../../../../config';
+import {format} from "date-fns";
 import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
 import 'react-clock/dist/Clock.css';
@@ -35,6 +36,9 @@ interface MemberTypes {
 interface leaveOptionType {
     id: number;
     leave_type: string;
+    LeaveBalance:{
+        total_balance:number
+    }
 }
 
 const ProjectForm = () => {
@@ -145,7 +149,11 @@ const ProjectForm = () => {
             setIsSubmitting(false);
         }
     };
-
+    useEffect(() => {
+        if (leaveDuration === 'single') {
+            setEndDate(startDate);
+        }
+    }, [startDate, leaveDuration]);
 
     const [teamMembers] = useState<MemberTypes[]>([
         { value: 'Shreyu N', name: 'Shreyu N', image: avatar2 },
@@ -231,7 +239,11 @@ const ProjectForm = () => {
                                                 <option value="">Select time off type</option>
                                                 {
                                                     timeOffType.map(val =>
-                                                        <option key={val.id} value={val.id}>{val.leave_type}</option>
+                                                        <>
+                                                        <option key={val.id} value={val.id} className='text-dark fw-bold'>{val.leave_type}  </option>
+                                                        <option className='text-secondary'>({val.LeaveBalance.total_balance===0?"no more leave" : `${val.LeaveBalance.total_balance} days left`})</option>
+                                                        </>
+                                                    
                                                     )
                                                 }
                                             </Form.Select>
@@ -274,6 +286,7 @@ const ProjectForm = () => {
                                                 <HyperDatepicker
                                                     hideAddon
                                                     value={startDate}
+                                                   
                                                     onChange={(date) => setStartDate(date)}
                                                 />
                                             </Form.Group>

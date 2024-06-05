@@ -14,6 +14,7 @@ import Anouncements from './Announcements';
 import Announcements from './Announcements';
 import { holidayList } from './data';
 import DataNotAvailable from '../../../DataNotAvailable/DataNotAvailable';
+import Spinner from '../../../components/Spinner';
 // import { emplyeesonleaveList, holidayList } from './data';
 
 interface Holiday {
@@ -54,6 +55,7 @@ const Dashboard = () => {
   const [leaveList,setLeaveList]=useState<EmployeesOnleave[]>([]);
   const [announcements,setAnnouncements]=useState<Announcement[]>([]);
   const [dataAvailable, setDataAvailable] = useState(true);
+  const [loading,setLoading]=useState(true)
   // const [employeeLeaveList,setEmploeeLeaveList]=useState<EmployeesOnLeave[]>([]);
   // const [loading,setLoading]=useState(true)
 
@@ -92,6 +94,9 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
 
+
+
+        setLoading(true)
         const url = `${BASE_URL}/api/dashboard`;
         
         const headers = {
@@ -112,17 +117,19 @@ const Dashboard = () => {
           setDataAvailable(true)
           
          
-          
+          setLoading(false)
           
           
         
         }else{
           setDataAvailable(false)
+          setLoading(false)
           console.error("Failed to fetch Holidays : " )
         }
 
       } catch (error:any) {
         setDataAvailable(false);
+        setLoading(false)
         console.error(error);
       } 
     };
@@ -130,6 +137,21 @@ const Dashboard = () => {
     fetchData(); 
   }, []);
 
+
+  if(loading){
+ 
+    if (loading) {
+      return (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Spinner size="md" type="bordered" color="primary">
+            <span className="sr-only">Loading...</span>
+        </Spinner>
+    </div>
+      );
+  }
+    
+
+  }
   if (!dataAvailable) {
     return <DataNotAvailable />;
 }

@@ -9,10 +9,11 @@ import config from '../../../../config';
 import Job from './Job';
 import Payroll from './Payroll';
 import Documents from './Documents';
-import Settings from './Settings';
+import SettingS from './Settings';
 // import { bank } from './data';
 import BASE_URL from "../../../../Base_URL/base_url";
-
+import DataNotAvailable from '../../../../DataNotAvailable/DataNotAvailable';
+import Spinner from "../../../../components/Spinner";
 
 // more
 
@@ -102,7 +103,35 @@ interface Timezone {
     timezoneformat: string;
     offset?: string;
 }
+interface Settings {
+    name: string;
+    timezoneformat: string;
+}
+
+
+///////////////////////////////////////////////////////////////
+///Function to convert date into date-month-year format
+function convertDateFormat(dateString:string) 
+:string{
+    // Parse the input date string
+    const [year, month, day] = dateString.split('-');
+    
+    // Array of full month names
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    
+    // Get the full name of the month
+    const monthFullName = monthNames[parseInt(month, 10) - 1];
+    
+    // Construct the desired output string
+    const formattedDate = `${day} ${monthFullName} ${year}`;
+    
+    return formattedDate;
+}
 const More = () => {
+    const [loading,setLoading]=useState(true)
 const [userData,setUserData]= useState<Personal>({
     Full_Name: '',
     Gender: '',
@@ -173,10 +202,17 @@ const [jobTimeLine,setJobTime]=useState<JobTimeline>({
 const [salaryData, setSalarydata] = useState<Salary[]>([]);
 const [docsData, setDocsdata] = useState<Docs[]>([]);
 const [timezone,setTimeZone]=useState<Timezone[]>([]);
+const [selectedTimezone, setSelectedTimezone] = useState<Timezone | null>(null);
+const [settingsData, setSettingsData] = useState<Settings>({
+    name: '',
+    timezoneformat: '',
+});
+const [dataAvailable,setDataAvailable]=useState(true);
 
 useEffect(() => {
     const fetchData = async () => {
         try {
+            setLoading(true)
             const url = `${BASE_URL}/api/user`;
             const headers = {
                 'Accept': 'application/json',
@@ -190,11 +226,12 @@ useEffect(() => {
             const response = await fetch(url, requestOptions);
             if (response.ok) {
                 const result = await response.json();
+                setDataAvailable(true)
                 // console.log( result.data.user.name)
                 setUserData({
                     Full_Name: result.data.user.name,
                     Gender: result.data.user.gender,
-                    Date_of_Birth: result.data.user.date_of_birth,
+                    Date_of_Birth: convertDateFormat(result.data.user.date_of_birth),
                     Marital_Status: result.data.user.marital_status,
                     Nationality: result.data.user.nationality,
                     National_ID_Number: result.data.user.national_id_number,
@@ -208,16 +245,31 @@ useEffect(() => {
                 //     id: undefined,  // Explicitly set undefined if necessary
                 //     offset: undefined  // Explicitly set undefined if necessary
                 // });
-                const timezoneName = result.data.user.timezone; // Assume this is a string
-            // Create a new timezone object with this name
-            const newTimezone = {
+            //     const timezoneName = result.data.user.timezone; // Assume this is a string
+            // // Create a new timezone object with this name
+            // const newTimezone:Timezone = {
+            //     name: timezoneName,
+            //     timezoneformat: timezoneName,  
+            //     id: undefined,  
+            //     offset: undefined  
+            // };
+            // setTimezone([newTimezone]);
+            // setSelectedTimezone(newTimezone);
+            // console.log(newTimezone.name)
+            const timezoneName = result.data.user.timezone; // Assume this is a string
+            const newTimezone: Timezone = {
                 name: timezoneName,
-                timezoneformat: timezoneName,  // Example adjustment
-                id: undefined,  // Since no id is available
-                offset: undefined  // Since no offset is provided
+                timezoneformat: timezoneName,
+                id: undefined,
+                offset: undefined
             };
-            console.log(newTimezone.name)
-            setTimeZone([newTimezone]); 
+            setTimeZone([newTimezone]);
+            setSelectedTimezone(newTimezone);
+            setSettingsData({
+                name: timezoneName,
+                timezoneformat: timezoneName
+            });
+          
                 setAddress({
                     Primary_Address: result.data.addresses.primary_address,
                     Country: result.data.addresses.country_name,
@@ -241,22 +293,22 @@ useEffect(() => {
                 });
                 setJobData({
                     Employee_ID: result.data.employee_detail.employee_id,
-                    Joining_Date: result.data.employee_detail.date_of_join,
+                    Joining_Date: convertDateFormat(result.data.employee_detail.date_of_join),
                     Service_Years: result.data.employee_detail.service_of_year
                 });
                 const { start_date, end_date, result:newResult, comment, attachments } = result.data.probationDetails[0];
 
       
             setProbation({
-                Probation_Start_Date: start_date,
-                Probation_End_Date: end_date,
+                Probation_Start_Date:convertDateFormat(start_date),
+                Probation_End_Date: convertDateFormat(end_date),
                 Result: newResult,
                 Comment: comment,
                 Attached_File: attachments
             });
             setJobTime({
-                from_date: result.data.employee_detail.date_of_join ,
-                to_date:  result.data.employee_detail.effective_date,
+                from_date: convertDateFormat(result.data.employee_detail.date_of_join ),
+                to_date:  convertDateFormat(result.data.employee_detail.effective_date),
                 job_title:  result.data.employee_detail.job_title,
                 position_type: result.data.employee_detail.position,
                 employement_type: result.data.employee_detail.employee_type,
@@ -266,20 +318,40 @@ useEffect(() => {
         
             setSalarydata(result.data.getMonthWiseSalary)
             setDocsdata(result.data.uploadedDocument); 
-            console.log(result.data.uploadedDocument)
+            console.log(result.data.uploadedDocument);
+            setLoading(false)
+            
                 // console.log(  `Gender: ${result.data.user.gender}`)
             } else {
                 console.error("Failed to fetch PersonalData: ", response.statusText);
+                setDataAvailable(false)
+                setLoading(false)
             }
-        } catch (error) {
+        } catch (error:any) {
             console.error("Error fetching data: ", error);
+            setDataAvailable(false)
+            setLoading(false)
         }
     };
     fetchData();
 }, []); 
 
+if(!dataAvailable){
+  return  <DataNotAvailable/>
+}
 
 
+    if(loading){
+        return(
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Spinner size="md" type="bordered" color="primary">
+            <span className="sr-only">Loading...</span>
+        </Spinner>
+    </div>
+        )
+     
+
+}
     return (
         <>
             <Tab.Container defaultActiveKey="general">
@@ -343,9 +415,10 @@ useEffect(() => {
                             </Tab.Pane>
                             <Tab.Pane eventKey="settings" className="p-0">
                                 {/* <Settings SettingsData={timezone}/> */}
-                                                            {timezone.length > 0 && (
-                                    <Settings SettingsData={timezone[0]} />
-                                )} 
+                                {timezone.length > 0 && (
+                                    <SettingS SettingsData={settingsData} setSettingsData={setSettingsData} />
+                                )}
+                                
                             </Tab.Pane>
                            
                         </Tab.Content>

@@ -1,6 +1,6 @@
 const config = {
     API_URL: process.env.REACT_APP_API_URL,
-    API_TOKEN: "871|yopOi34C8XYr3CUcJPzIIfUZeTM88Wixr17RJ655fdf3eb6e"
+    API_TOKEN: "1239|JloFJtSlSR4MLtOlirVkTOM27lxiKDDExM4vuUrJbee6b85b"
 };
 
 export default config;

@@ -35,62 +35,63 @@ const timeoff: TimeoffProps[] = [
 
 
 
-const leavesStatsRecord = [
-    {
-        text: 'Annual',
-        value: '17 Days',
-        balance : {
-            'Yearly Entitlement':'12 days',
-            'Carry Over':'6 days',
-            'Requested':'1 day',
-            'Carry Over Balance':'5 days',
-            'Balance':'17 days'
-        },
-        settings : {
-            'Paid Time off':'Yes',
-            'Accrual Frequency':'Yearly',
-            'Prorate Accrual':'Yes',
-            'Maximum Carry Over':'6 days',
-            'Carry Over Expiration':'Dec 31',
-        }
-    },
-    {
-        text: 'Paternity ',
-        value: '05 Days',
-        balance : {
-            'Yearly Entitlement':'12 days',
-            'Carry Over':'6 days',
-            'Requested':'1 day',
-            'Carry Over Balance':'5 days',
-            'Balance':'17 days'
-        },
-        settings : {
-            'Paid Time off':'Yes',
-            'Accrual Frequency':'Yearly',
-            'Prorate Accrual':'Yes',
-            'Maximum Carry Over':'6 days',
-            'Carry Over Expiration':'Dec 31',
-        }
-    },
-    {
-        text: 'Sick Leave',
-        value: '12 Days',
-        balance : {
-            'Yearly Entitlement':'12 days',
-            'Carry Over':'6 days',
-            'Requested':'1 day',
-            'Carry Over Balance':'5 days',
-            'Balance':'17 days'
-        },
-        settings : {
-            'Paid Time off':'Yes',
-            'Accrual Frequency':'Yearly',
-            'Prorate Accrual':'Yes',
-            'Maximum Carry Over':'6 days',
-            'Carry Over Expiration':'Dec 31',
-        }
-    },
+// const leavesStatsRecord = [
+//     {
+//         text: 'Annual',
+//         value: '17 Days',
+//         balance : {
+//             'Yearly Entitlement':'12 days',
+//             'Carry Over':'6 days',
+//             'Requested':'1 day',
+//             'Carry Over Balance':'5 days',
+//             'Balance':'17 days'
+//         },
+//         settings : {
+//             'Paid Time off':'Yes',
+//             'Accrual Frequency':'Yearly',
+//             'Prorate Accrual':'Yes',
+//             'Maximum Carry Over':'6 days',
+//             'Carry Over Expiration':'Nov',
+//         }
+//     },
+//     {
+//         text: 'Paternity ',
+//         value: '05 Days',
+//         balance : {
+//             'Yearly Entitlement':'12 days',
+//             'Carry Over':'6 days',
+//             'Requested':'1 day',
+//             'Carry Over Balance':'5 days',
+//             'Balance':'17 days'
+//         },
+//         settings : {
+//             'Paid Time off':'Yes',
+//             'Accrual Frequency':'Yearly',
+//             'Prorate Accrual':'Yes',
+//             'Maximum Carry Over':'6 days',
+//             'Carry Over Expiration':'Dec 31',
+//         }
+//     },
+//     {
+//         text: 'Sick Leave',
+//         value: '12 Days',
+//         balance : {
+//             'Yearly Entitlement':'12 days',
+//             'Carry Over':'6 days',
+//             'Requested':'1 day',
+//             'Carry Over Balance':'5 days',
+//             'Balance':'17 days'
+//         },
+//         settings : {
+//             'Paid Time off':'Yes',
+//             'Accrual Frequency':'Yearly',
+//             'Prorate Accrual':'Yes',
+//             'Maximum Carry Over':'6 days',
+//             'Carry Over Expiration':'Dec 31',
+//         }
+//     },
     
-];
+// ];
 
-export { timeoff, leavesStatsRecord };
+// export { timeoff, leavesStatsRecord };
+export {timeoff}

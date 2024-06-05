@@ -147,7 +147,7 @@ const columns = [
     },
     {
         Header: 'Payslip',
-        accessor: 'link', // Assuming 'link' contains the URL for the payslip
+        accessor: 'link', 
         sort: false,
         Cell: ActionColumn
         // Cell: ({ row }: { row: any }) => (
